@@ -121,8 +121,11 @@ python pipeline/distance_to_real.py           # Mahalanobis distance to the real
 ```
 
 The fine-tuned Marigold normals checkpoint (~3.5 GB) and the full
-13,551-pair RTI tile set are on Zenodo:
-[10.5281/zenodo.22828363](https://doi.org/10.5281/zenodo.22828363).
+13,551-pair tile set are on Zenodo, split over two records: the
+checkpoint and colour tiles in
+[10.5281/zenodo.22828363](https://doi.org/10.5281/zenodo.22828363),
+the normal-map tiles in
+[10.5281/zenodo.22920709](https://doi.org/10.5281/zenodo.22920709).
 
 ## Training your own stitch LoRA
 

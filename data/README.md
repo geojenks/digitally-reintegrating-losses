@@ -14,14 +14,17 @@ captions reduced to the trigger token alone.
 
 ## `tiles_sample/`
 
-Matched colour/normal RTI tile pairs (768×768), evenly sampled from
-the 13,551-pair set used to fine-tune Marigold for surface-normal
-estimation on embroidery. Same filename = same tile. 12 pairs live
-here for browsing; a 100-pair sample (`tiles_sample_100_pairs.zip`)
-is attached to the
-[latest release](https://github.com/geojenks/digitally-reintegrating-losses/releases);
-the full set and the fine-tuned checkpoint are on Zenodo:
-https://doi.org/10.5281/zenodo.22828363
+Matched colour/normal photometric stereo tile pairs (768×768), evenly
+sampled from the 13,551-pair set (11,813 training + 1,738 held out)
+used to fine-tune Marigold for surface-normal estimation on
+embroidery. Same filename = same tile. 12 pairs live here for
+browsing; a 100-pair sample (`tiles_sample_100_pairs.zip`) is attached
+to the
+[latest release](https://github.com/geojenks/digitally-reintegrating-losses/releases).
+The full set and the fine-tuned checkpoint are on Zenodo, split over
+two records: checkpoint + colour tiles in
+https://doi.org/10.5281/zenodo.22828363, normal tiles in
+https://doi.org/10.5281/zenodo.22920709
 
 ## `masks/`
 
