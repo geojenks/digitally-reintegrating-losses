@@ -12,14 +12,16 @@ Workshop on Graphics and Cultural Heritage, 2026).
 
 A method for digitally reintegrating losses in embroidered heritage
 textiles that is deliberately independent of any single generative
-model. Small LoRA adapters encode individual stitch structures —
-**satin stitch**, **french knot**, **silk purl** — from photographs of
+model. Small LoRA adapters encode individual stitch structures(
+**satin stitch**, **french knot**, **silk purl**) from photographs of
 17th-century English embroideries. They are deployed on
 inpainting/instruction-edit variants of contemporary diffusion model
-families (SDXL, FLUX.1, Qwen-Image-Edit). Fills are seeded with
-cheap **procedural texture inits** (knot bumps, parallel satin threads,
+families (SDXL, FLUX.1, Qwen-Image-Edit). Best resutls when fills are
+conditioned on **procedural texture initiations** with features that
+approximate the output texture (knot bumps, parallel satin threads,
 coiled purl) so the model restyles a structurally-correct starting
-point rather than inventing one.
+point rather than inventing one, but can be plain or language (CLIP)
+drive with full denoising set to 1.
 
 Verification happens in **surface-normal space**: a Marigold monocular
 normal estimator fine-tuned on 11,813 RTI tiles of the same corpus
@@ -27,9 +29,14 @@ converts each fill to a normal map, and seven training-free surface
 descriptors are compared by Mahalanobis distance to the descriptor
 cloud of real stitches of the prescribed type. A faithful fill
 reproduces the craft surface structure of the stitch type, not the
-exact thread positions of the lost original.
+exact thread positions of the lost original. This monocular surface
+estimator should work on any images of embroidery with comparable
+features, so is generalisable to unseen embroidery techniques.
 
-Everything runs on a single consumer GPU.
+Everything can run locally on a single consumer GPU, but commercial
+(rented) GPUs may be more viable for larger models, or for people
+without access to a powerful consumer GPU, e.g. GPU power to train
+a LoRA and generate fills may be paid for on Huggingface.
 
 ## Repository layout
 
@@ -39,9 +46,9 @@ Everything runs on a single consumer GPU.
 | `training/configs/` | The exact [ai-toolkit](https://github.com/ostris/ai-toolkit) configs the released LoRAs were trained with |
 | `training/TRAINING_TO_INFERENCE.txt` | Which base each LoRA was trained on, and which model to load it onto at inference |
 | `data/stitches/` | 20 sample training images + captions per stitch (satin, french knot, silk purl), plus the trigger-only caption variants |
-| `data/tiles_sample/` | Matched colour/normal RTI tile pairs (768×768) from the Marigold fine-tuning set — 12 pairs here, a 100-pair zip on the release, full 13,551-pair set on Zenodo |
+| `data/tiles_sample/` | Matched colour/normal RTI tile pairs (768×768) from the Marigold fine-tuning set. 12 pairs here, a 100-pair zip on the release, full 13,551-pair set on Zenodo |
 | `data/masks/` | The castle demonstration piece and its per-stitch loss masks |
-| `models/` | Where LoRA weights go — see [models/README.md](models/README.md) for downloads |
+| `models/` | Where LoRA weights go, see [models/README.md](models/README.md) for downloads |
 | `demo/` | The per-region variant picker (static HTML) |
 | `notebooks/` | Colab notebook: generate your own stitch textures with SDXL on a free GPU |
 | `media/` | Result images and parameter-sweep strips |
@@ -70,8 +77,8 @@ their own homes and accept their licences:
 
 | Model | Where | Notes |
 |---|---|---|
-| SDXL base / inpaint | pulled automatically from the Hugging Face hub on first run | no manual download; ~12 GB VRAM |
-| FLUX.1-dev | [black-forest-labs/FLUX.1-dev](https://huggingface.co/black-forest-labs/FLUX.1-dev) (gated — accept the licence) | set `FLUX_DEV_SAFETENSORS` to the file; ~24 GB VRAM |
+| SDXL base / inpaint | [stabilityai/stable-diffusion-xl-base-1.0 (SDXL)](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0) |  GB VRAM (over 12 recommended) |
+| FLUX.1-dev | [black-forest-labs/FLUX.1-dev](https://huggingface.co/black-forest-labs/FLUX.1-dev) (accept the licence) | set `FLUX_DEV_SAFETENSORS` to the file; ~24 GB VRAM |
 | FLUX.1-Fill-dev | [black-forest-labs/FLUX.1-Fill-dev](https://huggingface.co/black-forest-labs/FLUX.1-Fill-dev) | set `FLUX_FILL_SAFETENSORS` |
 | Qwen-Image-Edit | [Qwen/Qwen-Image-Edit-2511](https://huggingface.co/Qwen/Qwen-Image-Edit-2511) | set `QWEN_EDIT_SAFETENSORS`; fp8-quantised on load |
 
@@ -93,7 +100,7 @@ python pipeline/staged_reintegrate.py \
 ```
 
 On a smaller GPU, swap `--model flux_base --lora_variant trigonly_v2`
-for `--model sdxl_base --lora_variant v1` — or use the
+for `--model sdxl_base --lora_variant v1`, or use the
 [Colab notebook](notebooks/generate_textures_colab.ipynb), which runs
 the SDXL route on a free T4.
 
@@ -134,9 +141,10 @@ inference target.
 ## Data licence and provenance
 
 The photographs derive from RTI captures of 17th-century English
-embroideries. Samples in `data/` and the Zenodo deposit are released
-for educational and academic use. Code is MIT-licensed (see
-`LICENSE`).
+embroideries from a collection held by our collaborators at the
+Holburne Museum, Bath, in the United Kingdom. Samples in `data/`
+and the Zenodo deposit are released for educational and academic
+use. Code is MIT-licensed (see `LICENSE`).
 
 ## Citation
 
