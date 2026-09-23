@@ -52,14 +52,28 @@ function draw() {
   picksEl.innerHTML = regions.map((r, i) =>
     `<div id="p${i}">${r.stitch} r${r.region}: variant ${r.idx + 1}/${r.imgs.length}</div>`).join('');
 }
+const probe = document.createElement('canvas').getContext('2d', { willReadFrequently: true });
+function opaqueAt(r, px, py) {
+  const im = r.imgs[r.idx], [x0, y0, x1, y1] = r.bbox;
+  const sx = px * im.naturalWidth / (x1 - x0), sy = py * im.naturalHeight / (y1 - y0);
+  probe.canvas.width = probe.canvas.height = 1;
+  probe.clearRect(0, 0, 1, 1);
+  probe.drawImage(im, sx, sy, 1, 1, 0, 0, 1, 1);
+  return probe.getImageData(0, 0, 1, 1).data[3] > 16;
+}
 let lastHit = -1;
 cv.addEventListener('click', e => {
   const rect = cv.getBoundingClientRect();
   const x = (e.clientX - rect.left) * cv.width / rect.width;
   const y = (e.clientY - rect.top) * cv.height / rect.height;
-  // smallest bbox containing the click wins
+  // topmost region whose variant is opaque under the click wins;
+  // fall back to the smallest bbox if the click lands on a transparent gap
   let hit = -1, area = Infinity;
-  regions.forEach((r, i) => {
+  for (let i = regions.length - 1; i >= 0 && hit < 0; i--) {
+    const r = regions[i], [x0, y0, x1, y1] = r.bbox;
+    if (x >= x0 && x < x1 && y >= y0 && y < y1 && opaqueAt(r, x - x0, y - y0)) hit = i;
+  }
+  if (hit < 0) regions.forEach((r, i) => {
     const [x0, y0, x1, y1] = r.bbox;
     if (x >= x0 && x < x1 && y >= y0 && y < y1) {
       const a = (x1 - x0) * (y1 - y0);
