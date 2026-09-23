@@ -1,0 +1,81 @@
+job: extension
+config:
+  name: satin_stitch_flux1_lora_trigonly_v2
+  process:
+  - type: sd_trainer
+    training_folder: output
+    device: cuda:0
+    trigger_word: embstn
+    network:
+      type: lora
+      linear: 16
+      linear_alpha: 16
+    save:
+      dtype: float16
+      save_every: 250
+      max_step_saves_to_keep: 28
+      push_to_hub: false
+    datasets:
+    - folder_path: data/stitches/satin_trigonly   # point at your dataset
+      caption_ext: txt
+      caption_dropout_rate: 0.05
+      shuffle_tokens: false
+      cache_latents_to_disk: true
+      resolution:
+      - 1024
+      flip_x: true
+      flip_y: false
+    train:
+      batch_size: 1
+      steps: 5000
+      gradient_accumulation_steps: 1
+      train_unet: true
+      train_text_encoder: false
+      gradient_checkpointing: true
+      noise_scheduler: flowmatch
+      optimizer: adamw8bit
+      lr: 0.0001
+      ema_config:
+        use_ema: true
+        ema_decay: 0.99
+      dtype: bf16
+    model:
+      name_or_path: black-forest-labs/FLUX.1-dev
+      is_flux: true
+      quantize: true
+    sample:
+      sampler: flowmatch
+      sample_every: 250
+      width: 1024
+      height: 1024
+      prompts:
+      - embstn
+      - embstn, close-up macro photograph, raking light
+      - embstn, a single tulip in red and gold silk thread on ivory silk, 17th century
+        English embroidery
+      - embstn, a leopard in polychrome silks and gold thread, 17th century English
+        embroidery, museum photograph
+      - embstn, a peacock with iridescent silks on cream linen, raking light
+      - embstn, a rampant lion in gold and silver thread on crimson silk velvet
+      - embstn, a sampler with alphabet, strawberries and honeysuckle, polychrome
+        silks on cream linen
+      - a portrait of a young woman in profile, executed entirely in embstn
+      - a winter mountain landscape rendered in embstn, white and silver thread on
+        indigo silk
+      - embroidery of man with long red hair with embstn texture, playing chess at
+        the park, bomb going off in the background with flames in embstn texture
+      - embroidery of woman with long brown hair with embstn texture, doing work at
+        a desk, a storm is visible through the window with lightning bolts embstn
+        texture
+      - embroidery of a woman holding a coffee cup, in a beanie with embstn texture,
+        sitting at a cafe
+      - embroidery of a bear with embstn texture building a log cabin in the snow
+        covered mountains with embstn texture
+      neg: ''
+      seed: 42
+      walk_seed: true
+      guidance_scale: 4
+      sample_steps: 20
+meta:
+  name: satin_stitch_flux1_lora_trigonly_v2
+  version: '1.0'

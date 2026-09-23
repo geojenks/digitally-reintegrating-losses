@@ -1,0 +1,26 @@
+# Python 3.10+. Install a CUDA build of torch first if pip picks the CPU one:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
+torch>=2.3
+torchvision
+diffusers>=0.31
+transformers>=4.44
+accelerate
+safetensors
+sentencepiece
+protobuf
+pillow
+numpy
+scipy
+opencv-python
+matplotlib
+pandas
+tqdm
+tifffile
+huggingface_hub
+
+# optional extras:
+#   pipeline/sam_mask_tool.py needs segment-anything (pip install segment-anything)
+#     + the ViT-H checkpoint sam_vit_h_4b8939.pth from facebookresearch/segment-anything
+#   pipeline/caption_editor.py needs gradio
+#   pipeline/generate_type_normals.py needs the Marigold source on PYTHONPATH:
+#     git clone https://github.com/prs-eth/Marigold  (imports `from marigold import ...`)

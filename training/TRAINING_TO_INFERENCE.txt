@@ -1,0 +1,164 @@
+SATIN STITCH LORA — TRAINING → INFERENCE MAP
+==============================================
+
+For each LoRA training run, this is the base model trained on and the
+model the resulting .safetensors is intended to be loaded onto at
+inference time. Where the training base and inference target differ,
+the LoRA is "transferred" — the two models share architecture so the
+adapter slots in.
+
+All inference workflows assume ComfyUI (or equivalent). LoRA files end
+up at: output/<run_name>/<run_name>_<step>.safetensors
+
+
+------------------------------------------------------------------
+1. satin_lora_flux1.yaml  (FLUX.1-dev)
+------------------------------------------------------------------
+Trained on:    black-forest-labs/FLUX.1-dev
+Inference on:  black-forest-labs/FLUX.1-Fill-dev
+               (BFL's official inpainting fine-tune of FLUX.1-dev)
+
+Why it works: FLUX.1-Fill-dev is a fine-tune of FLUX.1-dev on masked
+image data. The transformer architecture is identical; Fill-dev adds
+mask-conditioning channels but the attention/MLP layers your LoRA
+modifies are the same.
+
+Alternative inference targets:
+  - black-forest-labs/FLUX.1-dev + Differential Diffusion node
+    (works on the base model with no inpaint variant; quality OK)
+  - black-forest-labs/FLUX.1-dev + Set Latent Noise Mask (img2img)
+    (basic SD-style masked img2img; lowest quality of the three)
+
+LoRA strength at inference: start at 1.0; if Fill-dev's own training
+overrides your concept too aggressively, drop to 0.7-0.8.
+
+
+------------------------------------------------------------------
+2. satin_lora_sdxl.yaml  (SDXL base)
+------------------------------------------------------------------
+Trained on:    stabilityai/stable-diffusion-xl-base-1.0
+Inference on:  diffusers/stable-diffusion-xl-1.0-inpainting-0.1
+
+Why it works: The SDXL inpaint variant is a fine-tune of base SDXL on
+masked images with extra input channels. The UNet's core attention
+layers (where the LoRA acts) are shared with base.
+
+Alternative inference targets:
+  - Any SDXL community inpainting checkpoint (juggernaut, dreamshaper-
+    inpaint, etc.) — they're all fine-tunes of the same base UNet
+  - stabilityai/stable-diffusion-xl-base-1.0 + Set Latent Noise Mask
+
+LoRA strength at inference: 1.0 typically; SDXL LoRAs are usually
+robust to inpaint-variant transfer.
+
+
+------------------------------------------------------------------
+3. satin_lora_flux2.yaml  (FLUX.2-Klein-base-4B by default)
+------------------------------------------------------------------
+Trained on:    black-forest-labs/FLUX.2-klein-base-4B
+Inference on:  Same model + an external inpaint workflow
+
+Why it works (and the caveat): FLUX.2 has native multimodal
+conditioning — it can accept image references directly in the prompt.
+Inpainting is achieved via ComfyUI nodes that mask the reference image
+and feed it back as conditioning. There's no separate "FLUX.2-Fill"
+variant available as open weights at the moment (BFL's FLUX.2 inpaint
+is API-only).
+
+If you swap to full FLUX.2-dev for training (per the comment in the
+config), the inference target also changes to FLUX.2-dev.
+
+Inference workflow: ComfyUI with FLUX.2 image-conditioning nodes +
+manual masking. The LoRA loads on the same model it trained on, so
+this is the only entry where training base == inference base.
+
+LoRA strength at inference: start at 1.0.
+
+
+------------------------------------------------------------------
+4. satin_lora_qwen.yaml  (Qwen-Image base)
+------------------------------------------------------------------
+Trained on:    Qwen/Qwen-Image
+Inference on:  Qwen/Qwen-Image-Edit-2509
+               (Alibaba's instruction-driven edit fine-tune)
+
+Why it works: Qwen-Image-Edit-2509 is a fine-tune of Qwen-Image base
+with added control-image conditioning. The transformer is shared; the
+edit variant just learns to consume image inputs alongside text. Your
+concept LoRA targets the transformer layers, which are common to both.
+
+Inpaint at inference: instruction-driven, not mask-based. The Edit
+model takes (source image, instruction). For loss reintegration:
+
+    "Fill the missing or damaged area with embsatin matching the
+     surrounding 17th century English embroidery pattern. Preserve
+     thread direction and colour."
+
+with the damaged textile as ctrl_img_1. No alpha-channel mask needed;
+the edit instruction carries the spatial intent.
+
+LoRA strength at inference: start at 1.0; Qwen LoRAs sometimes
+benefit from slightly lower strength (0.8) when used on the Edit
+variant since Edit's own fine-tuning is heavier than Fill-dev's.
+
+
+------------------------------------------------------------------
+5. satin_lora_flex2.yaml  (Flex2)  — RESERVE; you said you'll skip
+------------------------------------------------------------------
+Trained on:    ostris/Flex.2-preview
+Inference on:  Same model
+
+Flex2 is its own inpainting model with no need for transfer. The
+LoRA is trained under masking conditions and used under masking
+conditions. Only run this config if you want a comparison run vs.
+the FLUX.1-dev approach.
+
+
+------------------------------------------------------------------
+6. french_knot_lora_zimage.yaml / satin_lora_zimage.yaml  (Z-Image)
+------------------------------------------------------------------
+Trained on:    Z-Image *base*  (Tongyi-MAI, non-turbo)
+Inference on:  Z-Image-Turbo  (mask inpaint via diffusers ZImageInpaintPipeline)
+               base also works as a slower / heavier fallback
+               (Z-Image-Edit is NOT released yet — instruction path unavailable)
+
+Why it works: train on the plain flow-matching base (no de-distillation
+needed), then transfer the transformer LoRA onto Turbo — same
+ZImageTransformer2DModel — for fast few-step mask inpainting. Turbo is
+step-distilled, so use few steps + guidance ~1 (no CFG). The non-distilled base
+gives the same path at higher step count / guidance if Turbo quality disappoints.
+
+Do NOT train directly on Turbo: it is step-distilled and would need an
+assistant/de-distillation LoRA (cf. FLUX-schnell's ostris training adapter).
+
+LoRA strength at inference: start at 1.0.
+
+
+------------------------------------------------------------------
+SUMMARY TABLE
+------------------------------------------------------------------
+Run                          Train target         Inference target
+---------------------------- -------------------- ----------------------
+satin_lora_flux1.yaml              FLUX.1-dev           FLUX.1-Fill-dev
+satin_lora_sdxl.yaml         SDXL base 1.0        SDXL-1.0-inpainting-0.1
+satin_lora_flux2.yaml        FLUX.2-Klein-4B      FLUX.2-Klein-4B (same)
+satin_lora_qwen.yaml         Qwen-Image           Qwen-Image-Edit-2509
+satin_lora_flex2.yaml        Flex.2-preview       Flex.2-preview (same)
+*_lora_zimage.yaml           Z-Image base         Z-Image-Turbo (mask inpaint)
+
+
+------------------------------------------------------------------
+GENERAL NOTES FOR INFERENCE
+------------------------------------------------------------------
+- Each run produces 12 checkpoints (every 250 of 3000 steps). The
+  best checkpoint is rarely the last; evaluate visually across all
+  of them on the same test images for a fair pick.
+- For mask-based inpainting (FLUX.1, SDXL, FLUX.2), Qwen-Image-Edit
+  at inference uses instruction-only — different evaluation rig.
+- The trigger word "embsatin" needs to appear in your inference
+  prompts for FLUX.1, SDXL, FLUX.2, and Flex2 runs. For the Qwen
+  run, it's also "embsatin" (literal token in the captions).
+- LoRA file naming follows ai-toolkit convention:
+  output/<run_name>/<run_name>_<step>.safetensors
+
+Update this file if you add or rename a config.

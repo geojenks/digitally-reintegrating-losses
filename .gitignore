@@ -1,0 +1,11 @@
+# LoRA weights ship as GitHub Release assets, not in the repo
+models/*.safetensors
+
+# base-model downloads and run outputs
+output/
+staged_out/
+picker_out/
+__pycache__/
+*.pyc
+MANIFEST.txt
+release_assets/

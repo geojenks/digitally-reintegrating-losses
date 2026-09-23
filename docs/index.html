@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Digitally Reintegrating Losses in Heritage Embroidery</title>
+<style>
+:root { --ink:#222; --muted:#666; --accent:#7a5c2e; --line:#e2ddd4; }
+* { box-sizing:border-box; }
+body { margin:0; color:var(--ink); background:#fff;
+  font:17px/1.55 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+.wrap { max-width:920px; margin:0 auto; padding:0 20px 80px; }
+header { text-align:center; padding:56px 0 8px; }
+h1 { font-size:2.0em; line-height:1.2; margin:0 0 12px; }
+.venue { color:var(--accent); font-weight:600; margin-bottom:6px; }
+.authors { color:var(--muted); margin-bottom:20px; }
+.links { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin:18px 0 8px; }
+.links a { border:1px solid var(--line); border-radius:20px; padding:7px 18px;
+  text-decoration:none; color:var(--ink); font-size:.95em; background:#faf8f5; }
+.links a:hover { border-color:var(--accent); color:var(--accent); }
+h2 { font-size:1.35em; margin:52px 0 14px; border-bottom:1px solid var(--line); padding-bottom:8px; }
+img.full { width:100%; border:1px solid var(--line); border-radius:6px; }
+.cap { color:var(--muted); font-size:.9em; margin:6px 0 0; text-align:center; }
+.demos { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; margin-top:18px; }
+.demo { border:1px solid var(--line); border-radius:8px; padding:18px; background:#faf8f5; }
+.demo h3 { margin:0 0 8px; font-size:1.05em; }
+.demo p { margin:0 0 12px; font-size:.92em; color:var(--muted); }
+.demo a.btn { display:inline-block; background:var(--accent); color:#fff; border-radius:6px;
+  padding:8px 16px; text-decoration:none; font-size:.92em; }
+pre { background:#f6f4f0; border:1px solid var(--line); border-radius:6px; padding:14px;
+  overflow-x:auto; font-size:.82em; }
+figure { margin:26px 0; }
+a { color:var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="venue">Eurographics Workshop on Graphics and Cultural Heritage (GCH) 2026</div>
+  <h1>Digitally Reintegrating Losses in Heritage Embroidery</h1>
+  <div class="authors">George Jenkinson</div>
+  <div class="links">
+    <a href="#">📄 Paper (coming soon)</a>
+    <a href="https://github.com/geojenks/digitally-reintegrating-losses">💻 Code &amp; data</a>
+    <a href="https://colab.research.google.com/github/geojenks/digitally-reintegrating-losses/blob/main/notebooks/generate_textures_colab.ipynb">▶ Colab</a>
+    <a href="https://doi.org/10.5281/zenodo.22828363">🗄 Dataset &amp; models (Zenodo)</a>
+  </div>
+</header>
+
+<figure>
+  <img class="full" src="assets/loss_strip.jpg" alt="Underdrawing, stitch masks, procedural init, and final reintegration of the castle piece">
+  <p class="cap">A simulated loss on an embroidered casket panel: design underdrawing &rarr; per-stitch masks &rarr; procedural init &rarr; generative reintegration.</p>
+</figure>
+
+<h2>Abstract</h2>
+<p>
+Losses in embroidered heritage textiles are conventionally reintegrated by hand, stitch by stitch, or
+left visible. We present a digital reintegration method that is deliberately independent of any single
+generative model. Small LoRA adapters encode individual stitch structures — <b>satin stitch</b>,
+<b>french knot</b>, <b>silk purl</b> — from photographs of 17th-century English embroideries, and are
+deployed on inpainting and instruction-edit variants of contemporary diffusion model families.
+Each loss is first filled with a cheap <b>procedural texture init</b> that has the right bumpiness and
+periodicity but no realism; a masked denoise pass then restyles it into the prescribed stitch, so the
+model refines a structurally-correct starting point rather than inventing one.
+</p>
+<p>
+Verification happens in <b>surface-normal space</b>: a Marigold monocular normal estimator fine-tuned on
+11,813 RTI tiles of the same corpus converts each fill to a normal map, and seven training-free surface
+descriptors are compared by Mahalanobis distance to the descriptor cloud of real stitches of the
+prescribed type. A faithful fill reproduces the craft surface structure of the stitch type, not the
+exact thread positions of the lost original. Without the stitch LoRA, fills drift from the real-stitch
+cloud as the loss grows; with it, they stay close — and the benefit is largest for weakly
+image-conditioned model variants. The whole pipeline runs on a single consumer GPU.
+</p>
+
+<h2>Try it</h2>
+<div class="demos">
+  <div class="demo">
+    <h3>Per-region variant picker</h3>
+    <p>Eight pre-generated fills per loss region on the castle piece. Click a region to cycle its
+    variants, then download your composite.</p>
+    <a class="btn" href="picker/">Open the picker</a>
+  </div>
+  <div class="demo">
+    <h3>Your own image</h3>
+    <p>Upload an image, mask losses with box / brush / magic-wand tools, preview procedural stitch
+    fills in the browser, and export masks for the Colab notebook.</p>
+    <a class="btn" href="tryit/">Open the mask tool</a>
+  </div>
+  <div class="demo">
+    <h3>Generate real textures</h3>
+    <p>Run SDXL + the stitch LoRAs on a free Colab GPU — on the castle piece or on your own exported
+    image and masks. Free locally too, with a ~12&nbsp;GB GPU.</p>
+    <a class="btn" href="https://colab.research.google.com/github/geojenks/digitally-reintegrating-losses/blob/main/notebooks/generate_textures_colab.ipynb">Open in Colab</a>
+  </div>
+</div>
+
+<h2>Controllable structure</h2>
+<p>
+The procedural init exposes the parameters a conservator would reason about — knot size, satin thread
+width and angle, purl coil pitch, thread colour — and the denoise pass preserves them, so the same
+LoRA yields controllably different fills. Top rows: procedural inits. Bottom rows: generated fills.
+</p>
+<figure><img class="full" src="assets/strip_knot_radius.jpg" alt="French knot radius sweep">
+<p class="cap">French knot radius 8 → 24.</p></figure>
+<figure><img class="full" src="assets/strip_satin_thread.jpg" alt="Satin thread width sweep">
+<p class="cap">Satin thread width 2 → 14.</p></figure>
+<figure><img class="full" src="assets/strip_purl_coil.jpg" alt="Silk purl coil pitch sweep">
+<p class="cap">Silk purl coil pitch 4 → 18.</p></figure>
+<figure><img class="full" src="assets/strip_colourways.jpg" alt="Two colourways">
+<p class="cap">Colourways: the same masks and prompts with different procedural init colours.</p></figure>
+
+<h2>Result</h2>
+<figure>
+  <img class="full" src="assets/castle_reintegrated.jpg" alt="Final reintegrated castle composite">
+  <p class="cap">The castle piece reintegrated: per-region variants composed with the picker,
+  design lines carried through the init.</p>
+</figure>
+
+<h2>Resources</h2>
+<ul>
+  <li><b>Code</b>: the full pipeline, mask tools and evaluation —
+      <a href="https://github.com/geojenks/digitally-reintegrating-losses">GitHub</a></li>
+  <li><b>LoRA weights</b>: six adapters (SDXL and FLUX.1-dev, three stitches) —
+      <a href="https://github.com/geojenks/digitally-reintegrating-losses/releases">GitHub Releases</a></li>
+  <li><b>Training samples</b>: 20 image+caption pairs per stitch, plus the exact
+      <a href="https://github.com/ostris/ai-toolkit">ai-toolkit</a> configs — in the repo</li>
+  <li><b>RTI tiles &amp; fine-tuned Marigold</b>: 13,551 colour/normal pairs and the ~3.5&nbsp;GB
+      normals checkpoint — <a href="https://doi.org/10.5281/zenodo.22828363">Zenodo</a>
+      (100-pair sample in the repo)</li>
+</ul>
+
+<h2>Citation</h2>
+<pre>@inproceedings{reintegrating-losses-2026,
+  title     = {Digitally Reintegrating Losses in Heritage Embroidery},
+  booktitle = {Eurographics Workshop on Graphics and Cultural Heritage (GCH)},
+  year      = {2026},
+  note      = {To appear}
+}</pre>
+
+</div>
+</body>
+</html>

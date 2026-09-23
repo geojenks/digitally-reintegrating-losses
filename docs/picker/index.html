@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Region picker</title>
+<style>
+  :root { --bg: #f4f1ea; --fg: #222; --accent: #b05070; }
+  body { background: var(--bg); color: var(--fg); font: 14px/1.5 system-ui, sans-serif;
+         margin: 0; padding: 16px; }
+  #wrap { display: flex; gap: 16px; flex-wrap: wrap; }
+  canvas { max-width: min(1024px, 90vw); height: auto; border: 1px solid #ccc;
+           cursor: crosshair; background: #fff; }
+  #side { min-width: 220px; }
+  #picks div { padding: 2px 6px; border-radius: 4px; }
+  #picks div.active { background: var(--accent); color: #fff; }
+  button { margin-top: 8px; padding: 6px 12px; }
+  .hint { color: #666; font-size: 12px; }
+</style>
+</head>
+<body>
+<h3 style="margin-top:0">Per-region variant picker</h3>
+<p class="hint">Click a filled region to cycle its variants; shift-click cycles backwards.
+Live demo on the castle demonstration piece: eight pre-generated fills per loss region. <a href="../index.html">Back to project page</a>.</p>
+<div id="wrap">
+  <canvas id="cv"></canvas>
+  <div id="side">
+    <div id="picks"></div>
+    <button id="save">Download composite</button>
+    <div class="hint" id="savehint"></div>
+  </div>
+</div>
+<script src="regions.js"></script>
+<script>
+const R = window.REGIONS, cv = document.getElementById('cv'),
+      ctx = cv.getContext('2d'), picksEl = document.getElementById('picks');
+cv.width = cv.height = R.size;
+const baseImg = new Image(); baseImg.src = 'base.jpg';
+const regions = R.regions.map(r => ({...r, idx: 0, imgs: r.files.map(f => {
+  const im = new Image(); im.src = f; return im; })}));
+let loaded = 0;
+const total = 1 + regions.reduce((s, r) => s + r.imgs.length, 0);
+function tick() { if (++loaded >= total) draw(); }
+baseImg.onload = tick;
+regions.forEach(r => r.imgs.forEach(im => { im.onload = tick; im.onerror = tick; }));
+function draw() {
+  ctx.drawImage(baseImg, 0, 0);
+  // paste in generation order: stitches in R.order, regions as listed
+  for (const r of regions) {
+    const [x0, y0, x1, y1] = r.bbox;
+    ctx.drawImage(r.imgs[r.idx], x0, y0, x1 - x0, y1 - y0);
+  }
+  picksEl.innerHTML = regions.map((r, i) =>
+    `<div id="p${i}">${r.stitch} r${r.region}: variant ${r.idx + 1}/${r.imgs.length}</div>`).join('');
+}
+let lastHit = -1;
+cv.addEventListener('click', e => {
+  const rect = cv.getBoundingClientRect();
+  const x = (e.clientX - rect.left) * cv.width / rect.width;
+  const y = (e.clientY - rect.top) * cv.height / rect.height;
+  // smallest bbox containing the click wins
+  let hit = -1, area = Infinity;
+  regions.forEach((r, i) => {
+    const [x0, y0, x1, y1] = r.bbox;
+    if (x >= x0 && x < x1 && y >= y0 && y < y1) {
+      const a = (x1 - x0) * (y1 - y0);
+      if (a < area) { area = a; hit = i; }
+    }
+  });
+  if (hit < 0) return;
+  const r = regions[hit];
+  r.idx = (r.idx + (e.shiftKey ? r.imgs.length - 1 : 1)) % r.imgs.length;
+  lastHit = hit;
+  draw();
+  const el = document.getElementById('p' + hit);
+  if (el) el.classList.add('active');
+});
+document.getElementById('save').addEventListener('click', () => {
+  try {
+    const a = document.createElement('a');
+    a.download = 'composite_' + regions.map(r => r.idx).join('-') + '.png';
+    a.href = cv.toDataURL('image/png');
+    a.click();
+  } catch (err) {
+    document.getElementById('savehint').textContent =
+      'Blocked on file:// — run "python -m http.server" in this folder and open via ' +
+      'http://localhost:8000/region_picker.html, or note the variant numbers shown above.';
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Try It: Loss Masking</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="page-head">
+  <p class="back"><a href="../index.html">&larr; Back to project page</a></p>
+  <h1>Try it: mark losses and preview stitch fills</h1>
+  <p class="sub">Digitally Reintegrating Losses in Heritage Embroidery &middot; GCH 2026</p>
+  <p class="intro">
+    Upload a photograph of an embroidery (or use the sample), select the loss regions with the
+    box, brush or magic-wand tools, and assign each region one of three stitch types:
+    French knot, satin or silk purl. <strong>Preview fill</strong> shows a quick procedural
+    stand-in texture computed in your browser. The <em>real</em> generative fill runs in the
+    <a href="https://colab.research.google.com/github/geojenks/digitally-reintegrating-losses/blob/main/notebooks/generate_textures_colab.ipynb" target="_blank" rel="noopener">Colab notebook</a>,
+    using the image and per-stitch mask files you export here. Only these three stitch types
+    are available unless you <a href="https://github.com/geojenks/digitally-reintegrating-losses#training-your-own-stitch-lora" target="_blank" rel="noopener">train your own</a> stitch LoRA.
+    Nothing is uploaded: everything stays in your browser.
+  </p>
+</header>
+
+<main class="layout">
+  <aside class="panel">
+    <section>
+      <h2>1. Image</h2>
+      <label class="btn file-btn">Choose image&hellip;<input type="file" id="fileInput" accept="image/*"></label>
+      <button id="sampleBtn" class="btn">Use sample image</button>
+      <p class="hint" id="imgInfo">No image loaded. You can also drop a file on the canvas.</p>
+    </section>
+
+    <section>
+      <h2>2. Stitch type</h2>
+      <div class="stitch-tabs" role="radiogroup">
+        <label class="stitch st-fk"><input type="radio" name="stitch" value="0" checked><span class="sw"></span>French knot</label>
+        <label class="stitch st-sa"><input type="radio" name="stitch" value="1"><span class="sw"></span>Satin</label>
+        <label class="stitch st-sp"><input type="radio" name="stitch" value="2"><span class="sw"></span>Silk purl</label>
+      </div>
+      <button id="clearBtn" class="btn small">Clear this stitch's mask</button>
+      <p class="hint" id="maskInfo"></p>
+    </section>
+
+    <section>
+      <h2>3. Mask tool</h2>
+      <div class="tools" role="radiogroup">
+        <label><input type="radio" name="tool" value="box" checked> Box</label>
+        <label><input type="radio" name="tool" value="brush"> Brush</label>
+        <label><input type="radio" name="tool" value="wand"> Magic wand</label>
+      </div>
+      <label class="check"><input type="checkbox" id="eraser"> Eraser (subtract) &mdash; or hold Alt</label>
+      <div class="tool-opts" id="brushOpts">
+        <label>Brush radius <output id="brushOut">16</output> px
+          <input type="range" id="brushR" min="4" max="64" value="16"></label>
+      </div>
+      <div class="tool-opts" id="wandOpts">
+        <label>Tolerance <output id="tolOut">32</output>
+          <input type="range" id="tol" min="0" max="100" value="32"></label>
+        <label class="check"><input type="checkbox" id="nonContig"> Non-contiguous (whole image)</label>
+      </div>
+      <button id="undoBtn" class="btn small">Undo (Ctrl+Z)</button>
+    </section>
+
+    <section>
+      <h2>4. Procedural preview</h2>
+      <label class="check"><input type="checkbox" id="previewToggle"> Preview fill</label>
+      <label>Seed <input type="number" id="seed" value="1600" step="1"></label>
+      <fieldset>
+        <legend>French knot</legend>
+        <label>Knot radius r <output id="fkROut">13</output>
+          <input type="range" id="fkR" min="6" max="28" value="13" step="1"></label>
+        <label>Colour <input type="color" id="fkCol" value="#c89696"></label>
+      </fieldset>
+      <fieldset>
+        <legend>Satin</legend>
+        <label>Thread width tp <output id="saTpOut">4.5</output>
+          <input type="range" id="saTp" min="2" max="14" value="4.5" step="0.5"></label>
+        <label>Angle <output id="saAngOut">0</output>&deg;
+          <input type="range" id="saAng" min="0" max="180" value="0" step="1"></label>
+        <label>Colour <input type="color" id="saCol" value="#eee8d6"></label>
+      </fieldset>
+      <fieldset>
+        <legend>Silk purl</legend>
+        <label>Coil pitch cp <output id="spCpOut">7</output>
+          <input type="range" id="spCp" min="3" max="18" value="7" step="1"></label>
+        <label>Colour <input type="color" id="spCol" value="#966e3c"></label>
+      </fieldset>
+    </section>
+
+    <section>
+      <h2>5. Export</h2>
+      <button id="dlImage" class="btn">Download image</button>
+      <button id="dlMasks" class="btn">Download masks</button>
+      <button id="dlPreview" class="btn">Download preview</button>
+      <p class="hint">Masks are binary PNGs (white = selected) named
+        <code>&lt;stem&gt;__french_knot.png</code>, <code>&lt;stem&gt;__satin.png</code>,
+        <code>&lt;stem&gt;__silk_purl.png</code>; only non-empty masks are saved.</p>
+    </section>
+  </aside>
+
+  <section class="stage-wrap">
+    <div id="stage" class="stage empty">
+      <div class="canvas-box">
+        <canvas id="view"></canvas>
+        <canvas id="ui"></canvas>
+      </div>
+      <div class="drop-hint" id="dropHint">Drop an image here</div>
+    </div>
+    <p class="hint" id="status"></p>
+  </section>
+</main>
+
+<footer class="page-foot">
+  <a href="../index.html">&larr; Back to project page</a>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
