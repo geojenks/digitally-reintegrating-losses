@@ -1,0 +1,85 @@
+job: extension
+config:
+  name: silk_purl_zimage_lora_v1
+  process:
+  - type: sd_trainer
+    training_folder: output
+    device: cuda:0
+    trigger_word: embslkprl
+    network:
+      type: lora
+      linear: 16
+      linear_alpha: 16
+    save:
+      dtype: float16
+      save_every: 250
+      max_step_saves_to_keep: 28
+      push_to_hub: false
+    datasets:
+    - folder_path: data/stitches/silk_purl   # point at your dataset
+      caption_ext: txt
+      caption_dropout_rate: 0.05
+      shuffle_tokens: false
+      cache_latents_to_disk: true
+      resolution:
+      - 1024
+      flip_x: true
+      flip_y: false
+    train:
+      batch_size: 1
+      cache_text_embeddings: true
+      steps: 7000
+      gradient_accumulation_steps: 1
+      train_unet: true
+      train_text_encoder: false
+      gradient_checkpointing: true
+      noise_scheduler: flowmatch
+      optimizer: adamw8bit
+      lr: 0.0001
+      ema_config:
+        use_ema: true
+        ema_decay: 0.99
+      dtype: bf16
+    model:
+      name_or_path: Tongyi-MAI/Z-Image
+      arch: zimage
+      quantize: true
+      quantize_te: true
+      qtype: qfloat8
+      qtype_te: qfloat8
+    sample:
+      sampler: flowmatch
+      sample_every: 250
+      width: 1024
+      height: 1024
+      prompts:
+      - embslkprl
+      - embslkprl, close-up macro photograph, raking light
+      - embslkprl, a single tulip in red and gold silk thread on ivory silk, 17th
+        century English embroidery
+      - embslkprl, a leopard in polychrome silks and gold thread, 17th century English
+        embroidery, museum photograph
+      - embslkprl, a peacock with iridescent silks on cream linen, raking light
+      - embslkprl, a rampant lion in gold and silver thread on crimson silk velvet
+      - embslkprl, a sampler with alphabet, strawberries and honeysuckle, polychrome
+        silks on cream linen
+      - a portrait of a young woman in profile, executed entirely in embslkprl
+      - a winter mountain landscape rendered in embslkprl, white and silver thread
+        on indigo silk
+      - embroidery of man with long red hair with embslkprl texture, playing chess
+        at the park, bomb going off in the background with flames in embslkprl texture
+      - embroidery of woman with long brown hair with embslkprl texture, doing work
+        at a desk, a storm is visible through the window with lightning bolts embslkprl
+        texture
+      - embroidery of a woman holding a coffee cup, in a beanie with embslkprl texture,
+        sitting at a cafe
+      - embroidery of a bear with embslkprl texture building a log cabin in the snow
+        covered mountains with embslkprl texture
+      neg: ''
+      seed: 42
+      walk_seed: true
+      guidance_scale: 4
+      sample_steps: 20
+meta:
+  name: silk_purl_zimage_lora_v1
+  version: '1.0'
