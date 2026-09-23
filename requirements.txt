@@ -6,6 +6,7 @@ diffusers>=0.31
 transformers>=4.44
 accelerate
 safetensors
+peft
 sentencepiece
 protobuf
 pillow

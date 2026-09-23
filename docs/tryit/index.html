@@ -12,13 +12,15 @@
   <h1>Try it: mark losses and preview stitch fills</h1>
   <p class="sub">Digitally Reintegrating Losses in Heritage Embroidery &middot; GCH 2026</p>
   <p class="intro">
-    Upload a photograph of an embroidery (or use the sample), select the loss regions with the
-    box, brush or magic-wand tools, and assign each region one of three stitch types:
-    French knot, satin or silk purl. <strong>Preview fill</strong> shows a quick procedural
-    stand-in texture computed in your browser. The <em>real</em> generative fill runs in the
-    <a href="https://colab.research.google.com/github/geojenks/digitally-reintegrating-losses/blob/main/notebooks/generate_textures_colab.ipynb" target="_blank" rel="noopener">Colab notebook</a>,
-    using the image and per-stitch mask files you export here. Only these three stitch types
-    are available unless you <a href="https://github.com/geojenks/digitally-reintegrating-losses#training-your-own-stitch-lora" target="_blank" rel="noopener">train your own</a> stitch LoRA.
+    Upload a photograph of an embroidery (or use the sample) and mark the loss regions as
+    <strong>layers</strong> with the box, brush or magic-wand tools. Each layer has a stitch
+    (French knot, satin, silk purl, or your own), a colour and a few shape settings, so a cream
+    satin patch and black satin detail lines can be two layers. <strong>Quantise by colours</strong>
+    splits the image into flat colour areas to start from. <strong>Preview fill</strong> shows a quick
+    procedural stand-in texture computed in your browser. The <em>real</em> generative fill runs in the
+    <a href="https://colab.research.google.com/github/geojenks/digitally-reintegrating-losses/blob/main/notebooks/generate_textures_colab.ipynb" target="_blank" rel="noopener">Colab notebook</a>
+    or on your own GPU, from the job bundle (.zip) you export here. For other stitches,
+    <a href="https://github.com/geojenks/digitally-reintegrating-losses#training-your-own-stitch-lora" target="_blank" rel="noopener">train your own</a> stitch LoRA and add it as a custom stitch.
     Nothing is uploaded: everything stays in your browser.
   </p>
 </header>
@@ -29,18 +31,45 @@
       <h2>1. Image</h2>
       <label class="btn file-btn">Choose image&hellip;<input type="file" id="fileInput" accept="image/*"></label>
       <button id="sampleBtn" class="btn">Use sample image</button>
+      <label class="btn file-btn">Open job bundle&hellip;<input type="file" id="bundleInput" accept=".zip,application/zip"></label>
       <p class="hint" id="imgInfo">No image loaded. You can also drop a file on the canvas.</p>
     </section>
 
     <section>
-      <h2>2. Stitch type</h2>
-      <div class="stitch-tabs" role="radiogroup">
-        <label class="stitch st-fk"><input type="radio" name="stitch" value="0" checked><span class="sw"></span>French knot</label>
-        <label class="stitch st-sa"><input type="radio" name="stitch" value="1"><span class="sw"></span>Satin</label>
-        <label class="stitch st-sp"><input type="radio" name="stitch" value="2"><span class="sw"></span>Silk purl</label>
+      <h2>2. Layers</h2>
+      <div class="add-layer">
+        <select id="addStitch" aria-label="Stitch for the new layer"></select>
+        <button id="addLayerBtn" class="btn small">Add layer</button>
       </div>
-      <button id="clearBtn" class="btn small">Clear this stitch's mask</button>
-      <p class="hint" id="maskInfo"></p>
+      <ul id="layerList" class="layer-list"></ul>
+      <p class="hint">Click a layer to select it; the tools paint into it. Higher layers win where
+        layers overlap. Layers set to None are not exported. Hidden layers are still exported.</p>
+      <div id="layerProps" class="layer-props">
+        <label>Name <input type="text" id="lpName" maxlength="40" spellcheck="false" autocomplete="off"></label>
+        <div class="row-btns">
+          <button id="lpUp" class="btn small">Move up</button>
+          <button id="lpDown" class="btn small">Move down</button>
+          <button id="lpDelete" class="btn small">Delete</button>
+          <button id="clearBtn" class="btn small">Clear mask</button>
+        </div>
+        <label class="inline">Colour <input type="color" id="lpCol"></label>
+        <div id="lpSatin">
+          <label>Thread width <output id="lpThreadOut">4.5</output> px
+            <input type="range" id="lpThread" min="2" max="14" value="4.5" step="0.5"></label>
+          <label>Angle <output id="lpAngleOut">0</output>&deg; (0 = vertical threads)
+            <input type="range" id="lpAngle" min="0" max="180" value="0" step="1"></label>
+        </div>
+        <div id="lpKnot">
+          <label>Knot radius <output id="lpKnotROut">13</output> px
+            <input type="range" id="lpKnotR" min="6" max="28" value="13" step="1"></label>
+        </div>
+        <div id="lpPurl">
+          <label>Coil pitch <output id="lpCoilOut">7</output> px
+            <input type="range" id="lpCoil" min="3" max="18" value="7" step="1"></label>
+        </div>
+        <p class="hint" id="lpNote"></p>
+        <p class="hint" id="maskInfo"></p>
+      </div>
     </section>
 
     <section>
@@ -53,7 +82,7 @@
       <label class="check"><input type="checkbox" id="eraser"> Eraser (subtract) &mdash; or hold Alt</label>
       <div class="tool-opts" id="brushOpts">
         <label>Brush radius <output id="brushOut">16</output> px
-          <input type="range" id="brushR" min="4" max="64" value="16"></label>
+          <input type="range" id="brushR" min="1" max="64" value="16"></label>
       </div>
       <div class="tool-opts" id="wandOpts">
         <label>Tolerance <output id="tolOut">32</output>
@@ -64,39 +93,74 @@
     </section>
 
     <section>
-      <h2>4. Procedural preview</h2>
-      <label class="check"><input type="checkbox" id="previewToggle"> Preview fill</label>
-      <label>Seed <input type="number" id="seed" value="1600" step="1"></label>
-      <fieldset>
-        <legend>French knot</legend>
-        <label>Knot radius r <output id="fkROut">13</output>
-          <input type="range" id="fkR" min="6" max="28" value="13" step="1"></label>
-        <label>Colour <input type="color" id="fkCol" value="#c89696"></label>
-      </fieldset>
-      <fieldset>
-        <legend>Satin</legend>
-        <label>Thread width tp <output id="saTpOut">4.5</output>
-          <input type="range" id="saTp" min="2" max="14" value="4.5" step="0.5"></label>
-        <label>Angle <output id="saAngOut">0</output>&deg;
-          <input type="range" id="saAng" min="0" max="180" value="0" step="1"></label>
-        <label>Colour <input type="color" id="saCol" value="#eee8d6"></label>
-      </fieldset>
-      <fieldset>
-        <legend>Silk purl</legend>
-        <label>Coil pitch cp <output id="spCpOut">7</output>
-          <input type="range" id="spCp" min="3" max="18" value="7" step="1"></label>
-        <label>Colour <input type="color" id="spCol" value="#966e3c"></label>
-      </fieldset>
+      <h2>4. Quantise by colours</h2>
+      <p class="hint">Splits the image into flat colour areas, one new layer each. Then pick a stitch
+        for each layer.</p>
+      <label>Colours <output id="qNOut">6</output>
+        <input type="range" id="qN" min="2" max="16" value="6" step="1"></label>
+      <label>Smoothing <output id="qSmoothOut">2</output> px
+        <input type="range" id="qSmooth" min="0" max="4" value="2" step="1"></label>
+      <label>Merge areas under <output id="qMinOut">0 px</output>
+        <input type="range" id="qMin" min="0" max="5000" value="0" step="1"></label>
+      <label>Only inside layer <select id="qClip"><option value="">Whole image</option></select></label>
+      <label class="check"><input type="checkbox" id="qReplace" checked> Replace layers from the last quantise</label>
+      <button id="qPreviewBtn" class="btn small">Preview</button>
+      <button id="qApplyBtn" class="btn small">Create layers</button>
+      <button id="qDiscardBtn" class="btn small">Discard preview</button>
+      <p class="hint">To quantise just a loss, mark it as a layer first, choose it under
+        &ldquo;Only inside layer&rdquo;, then set that layer to None or delete it.</p>
     </section>
 
     <section>
-      <h2>5. Export</h2>
-      <button id="dlImage" class="btn">Download image</button>
-      <button id="dlMasks" class="btn">Download masks</button>
-      <button id="dlPreview" class="btn">Download preview</button>
-      <p class="hint">Masks are binary PNGs (white = selected) named
-        <code>&lt;stem&gt;__french_knot.png</code>, <code>&lt;stem&gt;__satin.png</code>,
-        <code>&lt;stem&gt;__silk_purl.png</code>; only non-empty masks are saved.</p>
+      <h2>5. Custom stitches</h2>
+      <p class="hint">For a stitch LoRA you trained yourself.</p>
+      <ul id="customList" class="custom-list"></ul>
+      <details class="custom-form">
+        <summary>Add custom stitch</summary>
+        <label>Name <input type="text" id="csName" placeholder="chain_stitch" spellcheck="false" autocomplete="off"></label>
+        <label>Trigger word <input type="text" id="csTrig" placeholder="embchn" spellcheck="false" autocomplete="off"></label>
+        <label>Init style
+          <select id="csInit">
+            <option value="satin">Satin</option>
+            <option value="french_knot">French knot</option>
+            <option value="silk_purl">Silk purl</option>
+            <option value="flat">Flat colour</option>
+          </select></label>
+        <label>LoRA file <input type="text" id="csLora" placeholder="my_stitch.safetensors" spellcheck="false" autocomplete="off"></label>
+        <p class="hint">Saved as <code>loras/&lt;file&gt;</code> in the job. Put the .safetensors file
+          in a <code>loras</code> folder in the bundle, or upload it alongside the zip in Colab. It
+          must suit the model it runs on (a FLUX LoRA for <code>flux_base</code>).</p>
+        <button id="csAdd" class="btn small">Add stitch</button>
+      </details>
+    </section>
+
+    <section>
+      <h2>6. Procedural preview</h2>
+      <label class="check"><input type="checkbox" id="previewToggle"> Preview fill</label>
+      <label>Preview seed <input type="number" id="seed" value="1600" step="1"></label>
+      <p class="hint">Each layer's colour and shape settings are in section 2.</p>
+    </section>
+
+    <section>
+      <h2>7. Export</h2>
+      <div class="two-col">
+        <label>Seed <input type="number" id="jobSeed" value="1600" step="1"></label>
+        <label>Variants per region <input type="number" id="jobVariants" value="0" min="0" max="16" step="1"></label>
+      </div>
+      <p class="hint">Variants: 0 = one fill per region; more saves extra fills to choose between.</p>
+      <button id="dlBundle" class="btn primary">Download job bundle (.zip)</button>
+      <button id="colabBtn" class="btn">Open in Colab</button>
+      <p class="hint">Colab: choose Runtime &rarr; Run all, and pick the zip when asked.</p>
+      <p class="hint">Locally: <code>python pipeline/staged_reintegrate.py --job &lt;file&gt;.zip --model flux_base --lora_variant trigonly_v2</code>,
+        or drop zips in a folder and run <code>python pipeline/run_jobs.py &lt;folder&gt;</code>.</p>
+      <details class="legacy">
+        <summary>Other downloads</summary>
+        <button id="dlImage" class="btn small">Download image</button>
+        <button id="dlMasks" class="btn small">Download per-stitch masks (legacy)</button>
+        <button id="dlPreview" class="btn small">Download preview</button>
+        <p class="hint">Per-stitch masks are binary PNGs (white = selected) named
+          <code>&lt;stem&gt;__&lt;stitch&gt;.png</code>, one per stitch in use.</p>
+      </details>
     </section>
   </aside>
 
@@ -106,7 +170,7 @@
         <canvas id="view"></canvas>
         <canvas id="ui"></canvas>
       </div>
-      <div class="drop-hint" id="dropHint">Drop an image here</div>
+      <div class="drop-hint" id="dropHint">Drop an image or job bundle here</div>
     </div>
     <p class="hint" id="status"></p>
   </section>

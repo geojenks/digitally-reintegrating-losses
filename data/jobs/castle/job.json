@@ -1,0 +1,18 @@
+{
+  "format": "reintegration-job",
+  "version": 1,
+  "name": "castle",
+  "image": "../../masks/castle.png",
+  "layers": [
+    {"id": "knots", "stitch": "french_knot", "mask": "../../masks/castle__french_knot.png",
+     "colour": "#c87878", "knot_r": 16},
+    {"id": "purl", "stitch": "silk_purl", "mask": "../../masks/castle__silk_purl.png",
+     "colour": "#966e3c"},
+    {"id": "satin", "stitch": "satin", "mask": "../../masks/castle__satin.png",
+     "colour": "#eee8d6"}
+  ],
+  "order": ["french_knot", "silk_purl", "satin"],
+  "settings": {"per_region": true, "region_max_up": 2, "brim": 10, "sib_feather": 3,
+               "denoise": 0.6, "denoise_french_knot": 0.65, "denoise_satin": 0.5,
+               "denoise_silk_purl": 0.8, "seed": 1600}
+}

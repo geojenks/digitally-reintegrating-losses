@@ -24,6 +24,10 @@ Usage
 
 # final quality
 ... --model qwen_edit --tries 3 --out staged_out
+
+# a job bundle from the mask tool (see JOB_FORMAT.md): image, one mask per
+# layer, per-layer colour/angle; --image/--masks not needed
+... staged_reintegrate.py --job my_job.zip --model flux_base --lora_variant trigonly_v2
 """
 from __future__ import annotations
 import argparse
@@ -61,6 +65,137 @@ QWEN_PROMPT = {
     "satin":       "fill the masked area with dense smooth vertical light blue {trig} texture",
     "silk_purl":   "fill the masked area with metallic arches of dark brown {trig} texture, coiled wire",
 }
+# --job defaults: as above, colour from the layer ({colour}) and no fixed satin direction
+# (the layer's angle sets it). "custom" = a job's own stitch with no prompt of its own.
+JOB_PROMPT = {
+    "french_knot": "{trig}, densely packed raised {colour} {trig} knots",
+    "satin":       "{trig}, dense, smooth {colour} {trig}",
+    "silk_purl":   "{trig}, metallic arches of {colour} {trig}, coiled wire",
+    "custom":      "{trig}, dense {colour} {trig}",
+}
+JOB_QWEN_PROMPT = {
+    "french_knot": "fill the masked area with densely packed raised {colour} {trig} texture",
+    "satin":       "fill the masked area with dense smooth {colour} {trig} texture",
+    "silk_purl":   "fill the masked area with metallic arches of {colour} {trig} texture, coiled wire",
+    "custom":      "fill the masked area with {colour} {trig} texture",
+}
+# plain names for {colour}: nearest (RGB distance) wins
+COLOUR_NAMES = {
+    "black": (20, 20, 20), "dark grey": (70, 70, 70), "grey": (128, 128, 128),
+    "light grey": (190, 190, 190), "white": (245, 245, 245), "cream": (238, 232, 214),
+    "beige": (215, 195, 160), "light brown": (165, 120, 75), "brown": (115, 75, 40),
+    "dark brown": (65, 42, 25), "gold": (205, 165, 60), "yellow": (235, 215, 70),
+    "orange": (225, 130, 45), "light red": (215, 130, 130), "red": (190, 40, 40),
+    "dark red": (115, 25, 30), "pink": (235, 165, 180), "purple": (115, 60, 135),
+    "light blue": (150, 185, 220), "blue": (55, 90, 170), "dark blue": (25, 35, 90),
+    "teal": (40, 125, 125), "light green": (150, 200, 130), "green": (60, 130, 60),
+    "dark green": (30, 70, 35), "olive": (120, 120, 50),
+}
+# procedural default base colours (see proc_tex), for naming a layer with no colour
+DEF_COL = {"french_knot": (200, 120, 120), "satin": (238, 232, 214),
+           "silk_purl": (150, 110, 60), "flat": (128, 128, 128)}
+LORA_FILE = {}                                          # --job custom stitch -> its LoRA file
+
+
+def colour_name(rgb) -> str:
+    return min(COLOUR_NAMES, key=lambda k: sum((a - b) ** 2 for a, b in zip(COLOUR_NAMES[k], rgb)))
+
+
+def hex_rgb(h):
+    """'#rrggbb' -> (r, g, b); None/'' -> None."""
+    return tuple(int(h.lstrip("#")[i:i + 2], 16) for i in (0, 2, 4)) if h else None
+
+
+def load_job(path):
+    """Read a job bundle (.zip, folder, or its job.json; see JOB_FORMAT.md). Zips
+    extract to a temp dir removed at exit. Paths resolve against the bundle root
+    ('..' allowed, so sample jobs can reuse data/masks); returns job.json as a dict
+    with absolute paths, plus _file (the job.json path)."""
+    import atexit, json, re, shutil, tempfile, zipfile
+    p = Path(path)
+    if p.suffix.lower() == ".zip":
+        root = Path(tempfile.mkdtemp(prefix="job_"))
+        atexit.register(shutil.rmtree, root, True)
+        with zipfile.ZipFile(p) as z:
+            z.extractall(root)
+        if not (root / "job.json").exists():            # zipped with a top folder
+            subs = [d for d in root.iterdir() if (d / "job.json").exists()]
+            root = subs[0] if len(subs) == 1 else root
+        jf = root / "job.json"
+    elif p.is_dir():
+        root, jf = p, p / "job.json"
+    else:
+        root, jf = p.parent, p
+    if not jf.exists():
+        raise SystemExit(f"--job: no job.json in {path}")
+    job = json.loads(jf.read_text(encoding="utf-8"))
+
+    def bad(msg):
+        return SystemExit(f"--job {path}: {msg}")
+
+    def rp(s):
+        return str((root / s).resolve())
+    if job.get("format", "reintegration-job") != "reintegration-job":
+        raise bad("format is not 'reintegration-job'")
+    if int(job.get("version", 1)) > 1:
+        raise bad(f"version {job['version']} is newer than this script understands (1)")
+    if not re.fullmatch(r"[A-Za-z0-9_-]+", str(job.get("name", ""))):
+        raise bad("name must match [A-Za-z0-9_-]+")
+    job["image"] = rp(job.get("image", "image.png"))
+    if not Path(job["image"]).exists():
+        raise bad(f"missing image: {job['image']}")
+    stitches = job.get("stitches") or {}
+    for k, s in stitches.items():
+        if not re.fullmatch(r"[a-z0-9_]+", k) or not s.get("lora") or not s.get("trigger"):
+            raise bad(f"stitch '{k}' needs a [a-z0-9_]+ key, a lora and a trigger")
+        s["lora"] = rp(s["lora"])
+        s.setdefault("init", k if k in DEF_COL else "flat")
+        if s["init"] not in DEF_COL:
+            raise bad(f"stitch '{k}': init must be one of {sorted(DEF_COL)}")
+    layers = job.get("layers") or []
+    if not layers:
+        raise bad("no layers")
+    isz, ids = Image.open(job["image"]).size, set()
+    for L in layers:
+        lid = str(L.get("id", ""))
+        if not re.fullmatch(r"[a-z0-9_]+", lid) or lid in ids:
+            raise bad(f"layer id '{lid}' must be unique and match [a-z0-9_]+")
+        ids.add(lid)
+        if L.get("stitch") not in STITCH and L.get("stitch") not in stitches:
+            raise bad(f"layer '{lid}': unknown stitch '{L.get('stitch')}'")
+        if L.get("colour") and not re.fullmatch(r"#[0-9a-fA-F]{6}", L["colour"]):
+            raise bad(f"layer '{lid}': colour must be #rrggbb")
+        L["mask"] = rp(L.get("mask", f"masks/{lid}.png"))
+        if not Path(L["mask"]).exists():
+            raise bad(f"layer '{lid}': missing mask {L['mask']}")
+        if Image.open(L["mask"]).size != isz:
+            print(f"WARN: layer '{lid}' mask is not the image size; resizing it")
+    job["_file"] = str(jf)
+    return job
+
+
+def job_settings(ap, job):
+    """job.json `settings` -> argparse defaults, so flags given on the command line
+    still win. Keys must be real flags; the runner owns model/out."""
+    acts = {a.dest: a for a in ap._actions}
+    s = dict(job.get("settings") or {})
+    if job.get("order") and "order" not in s:
+        s["order"] = job["order"]
+    out = {}
+    for k, v in s.items():
+        if k in ("model", "out", "image", "masks", "job"):
+            print(f"WARN: job setting '{k}' ignored (the runner sets it)")
+            continue
+        if k not in acts or k == "help":
+            raise SystemExit(f"--job: unknown setting '{k}' (not a staged_reintegrate.py flag)")
+        if isinstance(v, list):
+            v = ",".join(map(str, v))
+        if isinstance(v, str) and acts[k].type is not None:
+            v = acts[k].type(v)
+        out[k] = v
+    return out
+
+
 # Local single-file checkpoints for the FLUX/Qwen variants; point these at your
 # own downloads via environment variables. SDXL needs no local files (pulled
 # from the Hugging Face hub on first run).
@@ -74,6 +209,8 @@ FLUX_COMPONENTS = "black-forest-labs/FLUX.1-dev"
 
 
 def lora_path(stitch: str, model: str, variant: str = "v1", step: int = 0) -> str:
+    if stitch in LORA_FILE:                              # --job custom stitch: its own file
+        return LORA_FILE[stitch]
     lp, _ = STITCH[stitch]
     tok = "sdxl" if model.startswith("sdxl") else ("flux1" if model.startswith("flux") else "qwen")
     name = f"{lp}_{tok}_lora_{variant}"          # v1 | trigonly_v2 (flux1 only)
@@ -137,7 +274,7 @@ def proc_tex(stitch: str, rng, size: int = 512, knot_r: int = 0,
         base = np.array(col or rng.choice([(200, 120, 120), (215, 150, 150), (225, 190, 180)]),
                         np.float32)
         a[:] = base * 0.55                              # shadowed ground between knots
-        r = knot_r or rng.randint(11, 15)               # knot radius (px at 512)
+        r = knot_r or rng.randint(11, 15)               # knot radius (working-image px)
         step = int(r * 1.9)
         yy, xx = np.mgrid[-r:r + 1, -r:r + 1]
         bump = np.clip(1.15 - (np.sqrt(yy ** 2 + xx ** 2) / r) ** 1.5, 0, 1)
@@ -151,16 +288,18 @@ def proc_tex(stitch: str, rng, size: int = 512, knot_r: int = 0,
                 sl[:] = sl * (1 - bump[..., None] * 0.95) + col * bump[..., None] * 0.95
     elif stitch == "satin":
         base = np.array(col or (238, 232, 214), np.float32)    # cream
-        tp_ = satin_thread or 4.5                       # thread width (px at 512)
+        tp_ = satin_thread or 4.5                       # thread width (working-image px)
         th = np.deg2rad(angle)                          # 0 = vertical threads
         yy, xx = np.mgrid[0:size, 0:size]
         phase = xx * np.cos(th) + yy * np.sin(th)
         thread = 0.82 + 0.18 * np.abs(np.sin(np.pi * phase / tp_))
         a[:] = base * thread[..., None]                 # no sheen banding: it survived low
                                                         # denoise as grey wall stripes
+    elif stitch == "flat":                              # --job custom stitch, no structure
+        a[:] = np.array(col or DEF_COL["flat"], np.float32)
     else:                                               # silk_purl: coiled-wire rows
         base = np.array(col or (150, 110, 60), np.float32)     # brown-gold
-        cp = coil or rng.uniform(6.0, 8.0)              # coil pitch (px at 512)
+        cp = coil or rng.uniform(6.0, 8.0)              # coil pitch (working-image px)
         y = np.arange(size)
         coil_w = 0.5 + 0.5 * np.abs(np.sin(np.pi * y / cp))             # deep coil grooves
         band = 0.8 + 0.2 * np.sin(2 * np.pi * y / (4 * cp))             # row shading
@@ -375,8 +514,14 @@ def dark_stitch_pass(pipe, args, running, stamp_alpha, size, steps, guidance,
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--image", required=True)
-    ap.add_argument("--masks", required=True, help="dir with <stem>__<stitch>.png from paint_stitch_masks.py")
+    ap.add_argument("--image", help="the image (required unless --job)")
+    ap.add_argument("--masks", help="dir with <stem>__<stitch>.png from paint_stitch_masks.py "
+                                    "(required unless --job)")
+    ap.add_argument("--job", default=None,
+                    help="a job bundle (.zip, folder, or job.json; see JOB_FORMAT.md) instead of "
+                         "--image/--masks: one stage per stitch, each layer's own procedural init "
+                         "(implies --tex_proc), per-layer prompt/denoise; its settings become "
+                         "defaults that flags on the command line override")
     ap.add_argument("--model",
                     choices=["sdxl_base", "sdxl_inpaint", "flux_base", "flux_fill", "qwen_edit"],
                     default="sdxl_base",
@@ -412,16 +557,16 @@ def main():
                          "A --tex_<stitch> file overrides it for that stitch, and the literal "
                          "value 'proc' in a --tex_<stitch> list selects procedural per stitch")
     ap.add_argument("--proc_knot_r", type=int, default=0,
-                    help="procedural knot radius in px at 512 (0 = random 11-15)")
+                    help="procedural knot radius in working-image px (0 = random 11-15)")
     ap.add_argument("--proc_satin_thread", type=float, default=0.0,
-                    help="procedural satin thread width in px at 512 (0 = default 4.5)")
+                    help="procedural satin thread width in working-image px (0 = default 4.5)")
     ap.add_argument("--proc_satin_angle", type=float, default=0.0,
                     help="procedural satin thread angle in degrees (0 = vertical)")
     ap.add_argument("--proc_satin_angle_step", type=float, default=0.0,
                     help="extra angle per connected satin region, so separate regions "
                          "get differently angled threads (e.g. 30)")
     ap.add_argument("--proc_coil", type=float, default=0.0,
-                    help="procedural purl coil pitch in px at 512 (0 = random 6-8)")
+                    help="procedural purl coil pitch in working-image px (0 = random 6-8)")
     ap.add_argument("--proc_col_french_knot", default=None,
                     help="procedural base colour override 'R,G,B' (0-255); pair with a matching "
                          "--prompt_<stitch> so the prompt's colour words agree")
@@ -518,7 +663,18 @@ def main():
                     help="qwen_edit: torch.save/load path for the assembled fp8+LoRA transformer "
                          "(skips the ~10-min quantise on later runs; delete if LoRAs/order change)")
     ap.add_argument("--out", default="staged_out")
+    # --job: two-stage parse so the job's settings become defaults and the CLI still wins
+    job, jp = None, ap.parse_known_args()[0].job
+    if jp:
+        job = load_job(jp)
+        for k in job.get("stitches") or {}:             # per-stitch flags for its own stitches
+            for f, t in (("denoise", float), ("strength", float), ("prompt", str)):
+                if f"--{f}_{k}" not in ap._option_string_actions:
+                    ap.add_argument(f"--{f}_{k}", type=t, default=None)
+        ap.set_defaults(**{"tries": 1, **job_settings(ap, job)})   # one run per job unless asked
     args = ap.parse_args()
+    if job is None and not (args.image and args.masks):
+        ap.error("--image and --masks are required (or give --job)")
 
     pcol = {}
     for st_ in STITCH:
@@ -528,22 +684,51 @@ def main():
 
     ds_list = [float(v) for v in str(args.dark_stitch).split(",") if v]
     ds_on = any(v > 0 for v in ds_list)
-    if ds_on and "satin" not in args.order:
+    if job is None and ds_on and "satin" not in args.order:
         raise SystemExit("--dark_stitch needs the satin LoRA: include satin in --order")
 
-    img_path = Path(args.image)
-    stem = img_path.stem
-    order = [s for s in args.order.split(",") if s]
-    masks_dir = Path(args.masks)
+    if job is None:
+        img_path = Path(args.image)
+        stem = img_path.stem
+        order = [s for s in args.order.split(",") if s]
+        masks_dir = Path(args.masks)
+    else:
+        if args.dark_from:
+            raise SystemExit("--dark_from is not supported with --job (run it on the legacy CLI)")
+        img_path, stem = Path(job["image"]), job["name"]
+        for k, s in (job.get("stitches") or {}).items():
+            STITCH[k] = (k, s["trigger"])
+            LORA_FILE[k] = s["lora"]
+        seen = list(dict.fromkeys(L["stitch"] for L in job["layers"]))
+        want = [s for s in args.order.split(",") if s]  # job order (or --order); rest after
+        order = [s for s in want if s in seen] + [s for s in seen if s not in want]
+        if ds_on and "satin" not in order:
+            raise SystemExit("--dark_stitch needs the satin LoRA: the job has no satin layer")
+        args.tex_proc = True
 
     if args.paste_only or args.tex_proc:
         args.paste_tex = True
 
+    # layers: legacy = one per stitch (its mask, the global --proc_* look); --job = the
+    # job's layers, each with its own colour/shape and optional prompt/denoise
+    if job is None:
+        layers = [dict(id=st, stitch=st, init=st, mask=masks_dir / f"{stem}__{st}.png",
+                       col=pcol.get(st)) for st in order]
+    else:
+        sdef = job.get("stitches") or {}
+        layers = [dict(id=L["id"], stitch=L["stitch"], mask=L["mask"],
+                       init=sdef[L["stitch"]]["init"] if L["stitch"] in sdef else L["stitch"],
+                       col=hex_rgb(L.get("colour")) or pcol.get(L["stitch"]),
+                       angle=L.get("angle"), thread=L.get("thread"), knot_r=L.get("knot_r"),
+                       coil=L.get("coil"), prompt=L.get("prompt"), denoise=L.get("denoise"))
+                  for L in job["layers"]]
+    stage_layers = {st: [i for i, L in enumerate(layers) if L["stitch"] == st] for st in order}
+
     # resolve masks + LoRAs up front so we fail before loading a 20B model
     masks, loras = {}, {}
     for st in order:
-        mp = masks_dir / f"{stem}__{st}.png"
-        if not mp.exists():
+        mp = layers[stage_layers[st][0]]["mask"]
+        if not Path(mp).exists():
             raise SystemExit(f"missing mask: {mp}")
         masks[st] = mp
         if not args.paste_only:
@@ -556,7 +741,7 @@ def main():
     tex = {}
     if args.paste_tex:
         for st in order:
-            tp = getattr(args, f"tex_{st}")
+            tp = getattr(args, f"tex_{st}", None)
             if tp is None:
                 if args.tex_proc:
                     tex[st] = ["proc"]
@@ -574,41 +759,104 @@ def main():
             tex[st] = paths
             print(f"paste texture(s) for {st}: {paths}")
 
-    def load_mask(st, size):
-        m = Image.open(masks[st]).convert("L").resize((size, size), Image.NEAREST)
+    W0, H0 = Image.open(img_path).size
+
+    def crop_box(size):
+        """--job: where the image sits in the padded size x size square (None = legacy,
+        the image is squashed to the square as before)"""
+        if job is None:
+            return None
+        s = size / max(W0, H0)
+        w, h = max(1, round(W0 * s)), max(1, round(H0 * s))
+        x0, y0 = (size - w) // 2, (size - h) // 2
+        return (x0, y0, x0 + w, y0 + h)
+
+    def to_square(im, size, resample, pad):
+        """legacy: resize to size x size. --job: long side -> size, then pad to the
+        square (pad='reflect' for the image, 'constant' = zeros for masks)"""
+        cb = crop_box(size)
+        if cb is None:
+            return im.resize((size, size), resample)
+        a = np.asarray(im.resize((cb[2] - cb[0], cb[3] - cb[1]), resample))
+        pw = ((cb[1], size - cb[3]), (cb[0], size - cb[2])) + ((0, 0),) * (a.ndim - 2)
+        return Image.fromarray(np.pad(a, pw, mode=pad), im.mode)
+
+    def load_base(size):
+        return to_square(Image.open(img_path).convert("RGB"), size, Image.LANCZOS, "reflect")
+
+    def load_mask(path, size):
+        m = to_square(Image.open(path).convert("L"), size, Image.NEAREST, "constant")
         if args.mask_grow > 0:
             from PIL import ImageFilter
             m = m.filter(ImageFilter.MaxFilter(2 * args.mask_grow + 1))
             m = m.point(lambda v: 255 if v >= 128 else 0)
         return m
 
+    def load_layers(size):
+        """per-layer masks + per-stage unions. --job: later layers win on overlap
+        (whatever the stitch), so every pixel belongs to at most one layer"""
+        lm = [load_mask(L["mask"], size) for L in layers]
+        if job is None:
+            return lm, {st: lm[stage_layers[st][0]] for st in order}
+        taken = np.zeros((size, size), bool)
+        for i in reversed(range(len(lm))):
+            a = np.asarray(lm[i]) >= 128
+            lm[i] = Image.fromarray(((a & ~taken) * 255).astype(np.uint8), "L")
+            taken |= a
+        return lm, {st: Image.fromarray((np.any([np.asarray(lm[i]) >= 128 for i in stage_layers[st]],
+                                                axis=0) * 255).astype(np.uint8), "L")
+                    for st in order}
+
+    def layer_src(L, prng):
+        """procedural paste source for one layer: its own colour/shape, --proc_* as fallback"""
+        def mk(k):
+            a0 = args.proc_satin_angle if L.get("angle") is None else L["angle"]
+            ang = (a0 + k * args.proc_satin_angle_step) \
+                if L["init"] == "satin" else 0.0
+            return proc_tex(L["init"], prng, knot_r=L.get("knot_r") or args.proc_knot_r,
+                            satin_thread=L.get("thread") or args.proc_satin_thread,
+                            coil=L.get("coil") or args.proc_coil, noise=args.proc_noise,
+                            col=L["col"], angle=ang)
+        return mk if (L["init"] == "satin" and args.proc_satin_angle_step) else mk(0)
+
+    def paste_stage(running, st, lm, prng, rng):
+        """paste-init each layer of stitch `st` into its own mask -> (image, texture used)"""
+        tp = rng.choice(tex[st]) if rng else tex[st][0]
+        for i in stage_layers[st]:
+            running = paste_init(running, lm[i], layer_src(layers[i], prng) if tp == "proc" else tp,
+                                 rng=rng)
+        return running, tp
+
+    def cut(im):
+        """--job: crop a working-square image back to the image's own frame"""
+        return im if cb is None else im.crop(cb)
+
+    def save_job(out_root):
+        if job is not None:
+            import shutil
+            out_root.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(job["_file"], out_root / "job.json")
+
     if args.paste_only:
         # no model: just apply the pastes stage by stage and write the previews
         size = round16(args.size or 1024)
-        base = Image.open(img_path).convert("RGB").resize((size, size), Image.LANCZOS)
-        mL = {st: load_mask(st, size) for st in order}
+        cb = crop_box(size)
+        base = load_base(size)
+        lm, mL = load_layers(size)
         tdir = Path(args.out) / stem / "paste_preview"
         if args.mask_grow > 0:
             tdir = tdir.with_name(f"paste_preview_grow{args.mask_grow}")
         tdir.mkdir(parents=True, exist_ok=True)
+        save_job(tdir.parent)
         import random
         rng = random.Random(args.seed) if args.tex_shuffle else None
         running = base.copy()
         prng = rng or random.Random(args.seed)
         for i, st in enumerate(order, 1):
-            tp = rng.choice(tex[st]) if rng else tex[st][0]
-            if tp == "proc":
-                def mk(k, _st=st):
-                    ang = (args.proc_satin_angle + k * args.proc_satin_angle_step) \
-                        if _st == "satin" else 0.0
-                    return proc_tex(_st, prng, knot_r=args.proc_knot_r, noise=args.proc_noise,
-                                    satin_thread=args.proc_satin_thread, coil=args.proc_coil,
-                                    col=pcol.get(_st), angle=ang)
-                tp = mk if (st == "satin" and args.proc_satin_angle_step) else mk(0)
-            running = paste_init(running, mL[st], tp, rng=rng)
-            running.save(tdir / f"stage{i}_{st}_pasted.png")
-        strip = np.concatenate([np.asarray(base), np.full((size, 6, 3), 200, np.uint8),
-                                np.asarray(running)], axis=1)
+            running, _ = paste_stage(running, st, lm, prng, rng)
+            cut(running).save(tdir / f"stage{i}_{st}_pasted.png")
+        b_, r_ = np.asarray(cut(base)), np.asarray(cut(running))
+        strip = np.concatenate([b_, np.full((b_.shape[0], 6, 3), 200, np.uint8), r_], axis=1)
         Image.fromarray(strip).save(tdir / "paste_strip.png")
         print(f"paste-only previews -> {tdir}")
         return
@@ -635,8 +883,34 @@ def main():
     steps = args.steps or dflt["steps"]
     guidance = args.guidance or dflt["guidance"]
 
-    base = Image.open(img_path).convert("RGB").resize((size, size), Image.LANCZOS)
-    mL = {st: load_mask(st, size) for st in order}
+    cb = crop_box(size)
+    base = load_base(size)
+    lm, mL = load_layers(size)
+    lma = [np.asarray(m) >= 128 for m in lm]
+    qwen = args.model.startswith("qwen")
+
+    def layer_pd(L):
+        """(prompt, denoise) for one layer. --job: layer > --prompt_/--denoise_<stitch>
+        (flag or job setting) > the job's stitch prompt > JOB_PROMPT, {colour} filled in"""
+        st = L["stitch"]
+        _, trig = STITCH[st]
+        if job is None:
+            tmpl = getattr(args, f"prompt_{st}") or (QWEN_PROMPT[st] if qwen else PROMPT[st])
+            prompt = tmpl.format(trig=trig)
+        else:
+            jp_ = JOB_QWEN_PROMPT if qwen else JOB_PROMPT
+            tmpl = L.get("prompt") or getattr(args, f"prompt_{st}", None) or \
+                (job.get("stitches") or {}).get(st, {}).get("prompt") or jp_.get(st, jp_["custom"])
+            prompt = tmpl.format(trig=trig, colour=colour_name(L["col"] or DEF_COL[L["init"]]))
+        dn = L.get("denoise")
+        if dn is None:
+            dn = getattr(args, f"denoise_{st}", None)
+        return prompt, (float(dn) if dn is not None else args.denoise)
+
+    def majority(st, region):
+        """the stitch's layer covering most of `region` (bool array)"""
+        ids = stage_layers[st]
+        return ids[int(np.argmax([(lma[i] & region).sum() for i in ids]))]
     # --stamp_dark: fixed darkening alpha from the original's dark features in any mask
     stamp_alpha = None
     if args.stamp_dark > 0 or ds_on:
@@ -719,6 +993,7 @@ def main():
         variant_tag += f"_sa{args.proc_satin_angle:g}s{args.proc_satin_angle_step:g}"
 
     out_root = Path(args.out) / stem
+    save_job(out_root)
     for run_i, (seeds, tag) in enumerate(runs, 1):
         tdir = out_root / f"{args.model}{variant_tag}_{tag}"
         tdir.mkdir(parents=True, exist_ok=True)
@@ -731,36 +1006,22 @@ def main():
         for i, st in enumerate(order, 1):
             seed = seeds[i - 1]                                  # per-stage seed
             _, trig = STITCH[st]
-            tmpl = getattr(args, f"prompt_{st}") or \
-                (QWEN_PROMPT[st] if args.model.startswith("qwen") else PROMPT[st])
-            prompt = tmpl.format(trig=trig)
-            s_st = getattr(args, f"strength_{st}")
+            # prompt/denoise per layer; a stage-wide pass uses the layer covering most of it
+            pd = {li: layer_pd(layers[li]) for li in stage_layers[st]}
+            prompt, dn = pd[majority(st, np.asarray(mL[st]) >= 128)]
+            s_st = getattr(args, f"strength_{st}", None)
             s_st = float(s_st) if s_st is not None else float(args.strength)
             pipe.set_adapters([st], [s_st])
             stage_in = running
-            dn = getattr(args, f"denoise_{st}")
-            dn = float(dn) if dn is not None else args.denoise
             # --brim: the model fills a band past the border too, and the same grown
             # band (minus siblings) is what gets pasted back
             bgrow = args.brim if args.brim > 0 else args.edge_grow
             if args.paste_tex:
-                tp = rng.choice(tex[st]) if rng else tex[st][0]
-                if tp == "proc":
-                    _prng = rng or random.Random(seed)
-                    def mk(k, _st=st, _prng=_prng):
-                        ang = (args.proc_satin_angle + k * args.proc_satin_angle_step) \
-                            if _st == "satin" else 0.0
-                        return proc_tex(_st, _prng, knot_r=args.proc_knot_r,
-                                        satin_thread=args.proc_satin_thread, coil=args.proc_coil,
-                                        noise=args.proc_noise, col=pcol.get(_st), angle=ang)
-                    tp = mk if (st == "satin" and args.proc_satin_angle_step) else mk(0)
-                    tex_used[st] = "proc"
-                else:
-                    tex_used[st] = os.path.basename(tp)
-                stage_in = paste_init(running, mL[st], tp, rng=rng)
+                stage_in, tp = paste_stage(running, st, lm, rng or random.Random(seed), rng)
+                tex_used[st] = "proc" if tp == "proc" else os.path.basename(tp)
                 if args.keep_dark > 0:
                     stage_in = keep_dark(stage_in, base, mL[st], args.keep_dark)
-                stage_in.save(tdir / f"stage{i}_{st}_pasted_init.png")
+                cut(stage_in).save(tdir / f"stage{i}_{st}_pasted_init.png")
             if args.per_region:
                 # each connected region independently: crop a padded square, upscale to
                 # the working size, fill, downscale, paste back through the region mask
@@ -789,11 +1050,18 @@ def main():
                     cma = np.asarray(cm)
                     pys, pxs = np.nonzero(cma > 0)
                     pbox = (int(pxs.min()), int(pys.min()), int(pxs.max()) + 1, int(pys.max()) + 1)
+                    if cb is not None:                   # --job: clip the patch to the image
+                        pbox = (max(pbox[0], cb[0]), max(pbox[1], cb[1]),
+                                min(pbox[2], cb[2]), min(pbox[3], cb[3]))
+                    li = majority(st, comp)              # prompt/denoise from the majority layer
+                    prompt_c, dn_c = pd[li]
+                    if job is not None:
+                        print(f"    region {lab}: layer {layers[li]['id']} dn={dn_c:g} :: {prompt_c}")
                     first = None
                     vfiles = []
                     for k in range(max(1, args.region_variants)):
-                        out_c = fill_stage(pipe, args.model, crop_in, crop_m, prompt, rsize, steps,
-                                           guidance, seed + 1000 * lab + k, denoise=dn)
+                        out_c = fill_stage(pipe, args.model, crop_in, crop_m, prompt_c, rsize, steps,
+                                           guidance, seed + 1000 * lab + k, denoise=dn_c)
                         patched = running.copy()
                         patched.paste(out_c.resize((side, side), Image.LANCZOS), (x0, y0))
                         if first is None:
@@ -813,6 +1081,10 @@ def main():
                     if args.region_variants > 0:
                         variants_meta.append({"stitch": st, "region": int(lab),
                                               "bbox": list(pbox), "files": vfiles})
+                        if cb is not None:               # bbox in the cropped image's frame
+                            variants_meta[-1]["bbox"] = [pbox[0] - cb[0], pbox[1] - cb[1],
+                                                         pbox[2] - cb[0], pbox[3] - cb[1]]
+                            variants_meta[-1]["layer"] = layers[li]["id"]
                     running = Image.composite(first, running, cm)
                     done += 1
                 print(f"    per-region: {done} regions filled")
@@ -827,7 +1099,7 @@ def main():
                 pipe_rim.set_adapters([st], [s_st])
                 out2 = fill_stage(pipe_rim, "sdxl", running, rim, prompt, size, steps, guidance, seed)
                 running = Image.composite(out2, running, rim)
-            running.save(tdir / f"stage{i}_{st}.png")
+            cut(running).save(tdir / f"stage{i}_{st}.png")
             print(f"  stage {i}: {st} ({trig}) seed={seed}" + ("  +rim" if pipe_rim is not None else ""))
         if stamp_alpha is not None:
             running = Image.fromarray(np.clip(
@@ -838,17 +1110,21 @@ def main():
             s_sat = float(s_sat) if s_sat is not None else float(args.strength)
             running = dark_stitch_pass(pipe, args, running, stamp_alpha, size, steps,
                                        guidance, seeds[0] + 77, ds_list[0], s_sat)
-            running.save(tdir / "dark_stitch.png")
+            cut(running).save(tdir / "dark_stitch.png")
         if variants_meta:
             import json
-            base.save(tdir / "variants" / "base.png")
-            vj = json.dumps({"size": size, "order": order, "regions": variants_meta}, indent=1)
+            cut(base).save(tdir / "variants" / "base.png")
+            rj = {"size": size, "order": order, "regions": variants_meta}
+            if cb is not None:                                   # --job: non-square frame
+                rj = {"size": size, "width": cb[2] - cb[0], "height": cb[3] - cb[1],
+                      "order": order, "regions": variants_meta}
+            vj = json.dumps(rj, indent=1)
             (tdir / "variants" / "regions.json").write_text(vj)
             # regions.js lets the picker page work from file:// (fetch is blocked there)
             (tdir / "variants" / "regions.js").write_text("window.REGIONS = " + vj + ";")
             print(f"  variants: {sum(len(v['files']) for v in variants_meta)} patches, "
                   f"{len(variants_meta)} regions -> {tdir / 'variants'}")
-        meta = png_meta({"model": args.model, "order": ",".join(order), "strength": args.strength,
+        md = ({"model": args.model, "order": ",".join(order), "strength": args.strength,
                          "steps": steps, "guidance": guidance, "size": size,
                          "lora_variant": args.lora_variant, "lora_step": args.lora_step,
                          "denoise": args.denoise, "paste_tex": int(args.paste_tex),
@@ -859,19 +1135,25 @@ def main():
                          "edge_grow": args.edge_grow,
                          "edge_feather": args.edge_feather, "region_max_up": args.region_max_up,
                          "denoise_per": ";".join(
-                             f"{s}={getattr(args, f'denoise_{s}') if getattr(args, f'denoise_{s}') is not None else args.denoise:g}"
+                             f"{s}={getattr(args, f'denoise_{s}', None) if getattr(args, f'denoise_{s}', None) is not None else args.denoise:g}"
                              for s in order),
                          "mask_grow": args.mask_grow,
                          "tex_used": ";".join(f"{k}={v}" for k, v in tex_used.items()),
                          "seeds": ",".join(map(str, seeds))})
-        running.save(tdir / "final.png", pnginfo=meta)
+        if job is not None:
+            md["job"] = stem
+            md["layers"] = ";".join(f"{L['id']}={L['stitch']}" for L in layers)
+        meta = png_meta(md)
+        cut(running).save(tdir / "final.png", pnginfo=meta)
         # strip: original | all-masks overlay | final
         ov = np.asarray(base).copy()
-        for st, col in zip(order, [(31, 119, 180), (44, 160, 44), (214, 39, 40)]):
+        for st, col in zip(order, [(31, 119, 180), (44, 160, 44), (214, 39, 40),
+                                   (148, 103, 189), (255, 127, 14), (23, 190, 207)]):
             m = np.asarray(mL[st]) >= 128
             ov[m] = (0.45 * ov[m] + 0.55 * np.array(col)).astype(np.uint8)
-        strip = np.concatenate([np.asarray(base), np.full((size, 6, 3), 200, np.uint8),
-                                ov, np.full((size, 6, 3), 200, np.uint8), np.asarray(running)], axis=1)
+        b_, o_, r_ = (np.asarray(cut(x)) for x in (base, Image.fromarray(ov), running))
+        sep = np.full((b_.shape[0], 6, 3), 200, np.uint8)
+        strip = np.concatenate([b_, sep, o_, sep, r_], axis=1)
         Image.fromarray(strip).save(tdir / "strip.png")
         print(f"  -> {tdir}\\final.png")
 

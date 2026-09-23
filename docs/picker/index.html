@@ -33,7 +33,7 @@ Live demo on the castle demonstration piece: eight pre-generated fills per loss 
 <script>
 const R = window.REGIONS, cv = document.getElementById('cv'),
       ctx = cv.getContext('2d'), picksEl = document.getElementById('picks');
-cv.width = cv.height = R.size;
+cv.width = R.width || R.size; cv.height = R.height || R.size;
 const baseImg = new Image(); baseImg.src = 'base.jpg';
 const regions = R.regions.map(r => ({...r, idx: 0, imgs: r.files.map(f => {
   const im = new Image(); im.src = f; return im; })}));

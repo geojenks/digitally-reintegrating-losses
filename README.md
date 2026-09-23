@@ -112,6 +112,30 @@ inits with no model loaded. `--region_variants N` generates N options
 per loss region and `demo/region_picker.html` lets you assemble the
 final composite by eye.
 
+### Your own image
+
+Draw your loss masks with the mask tool on the
+[project page](https://geojenks.github.io/digitally-reintegrating-losses/)
+and download the job bundle (a .zip holding the image, one mask per
+layer and the settings). Then:
+
+```bash
+python pipeline/staged_reintegrate.py --job my_job.zip --model flux_base --lora_variant trigonly_v2
+```
+
+Or drop several bundles in a folder and run them all; finished jobs are
+skipped on a rerun:
+
+```bash
+python pipeline/run_jobs.py jobs/
+```
+
+Or upload the bundle to the
+[Colab notebook](notebooks/generate_textures_colab.ipynb) and choose
+*Run all*. The bundle format is described in
+[pipeline/JOB_FORMAT.md](pipeline/JOB_FORMAT.md). The castle demo also
+ships as a job: `--job data/jobs/castle`.
+
 ### Verify a fill
 
 ```bash
