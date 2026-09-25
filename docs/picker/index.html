@@ -96,7 +96,7 @@ document.getElementById('save').addEventListener('click', () => {
     a.click();
   } catch (err) {
     document.getElementById('savehint').textContent =
-      'Blocked on file:// — run "python -m http.server" in this folder and open via ' +
+      'Blocked on file://. Run"python -m http.server" in this folder and open via ' +
       'http://localhost:8000/region_picker.html, or note the variant numbers shown above.';
   }
 });

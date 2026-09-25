@@ -40,7 +40,7 @@ loras/<file>         optional: custom LoRA weights named in job.json
                      "init": "satin", "prompt": "{trig}, {colour} {trig}"}
   },
   "order": ["french_knot", "silk_purl", "satin", "chain_stitch"],
-  "settings": {"per_region": true, "brim": 10, "sib_feather": 3,
+  "settings": {"per_region": true, "proc_base": true, "brim": 10, "sib_feather": 3,
                "region_max_up": 2, "denoise": 0.6, "denoise_french_knot": 0.65,
                "denoise_satin": 0.5, "denoise_silk_purl": 0.8,
                "region_variants": 0, "seed": 1600, "size": 1024}
@@ -84,6 +84,15 @@ Fields:
   other.
 - With `per_region`, each connected region of the stage's union is filled on
   its own. Its prompt and denoise come from the layer covering most of it.
+  Add `per_layer` to split by layer first, so touching layers of one stitch
+  (the tones of a face, say) are filled separately, each in its own crop.
+  This means more fills, but each one sees less of the picture.
+- With `proc_base` (the mask tool turns it on), every layer's init is pasted
+  before the first pass, so no stage sees the original photo inside any mask.
+  Without it, each stage pastes only its own stitch, and earlier stages see the
+  photo where later stitches will go. Unmasked pixels are always the original,
+  so for filling losses in a real object it only changes what the earlier
+  stages see inside the later stages' losses.
 - `{colour}` in a prompt becomes the nearest plain colour name to the layer's
   colour (for example "dark red", "cream", "black").
 - Non-square images are padded to a square for the model and cropped back.

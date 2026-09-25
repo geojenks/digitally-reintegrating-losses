@@ -1,0 +1,898 @@
+{
+ "models": [
+  {
+   "key": "sdxl",
+   "label": "SDXL",
+   "figure3_prompt_index": 1,
+   "runs": {
+    "french_knot": {
+     "run": "french_knot_stitch_sdxl_lora_v1",
+     "steps": [
+      0,
+      500,
+      1000,
+      1500,
+      2000,
+      2500,
+      3000,
+      3500,
+      4000,
+      4500,
+      5000,
+      5500,
+      6000,
+      6500,
+      7000
+     ],
+     "files": {
+      "0": [
+       "sdxl_french_knot_p0_00000.webp",
+       "sdxl_french_knot_p0_00500.webp",
+       "sdxl_french_knot_p0_01000.webp",
+       "sdxl_french_knot_p0_01500.webp",
+       "sdxl_french_knot_p0_02000.webp",
+       "sdxl_french_knot_p0_02500.webp",
+       "sdxl_french_knot_p0_03000.webp",
+       "sdxl_french_knot_p0_03500.webp",
+       "sdxl_french_knot_p0_04000.webp",
+       "sdxl_french_knot_p0_04500.webp",
+       "sdxl_french_knot_p0_05000.webp",
+       "sdxl_french_knot_p0_05500.webp",
+       "sdxl_french_knot_p0_06000.webp",
+       "sdxl_french_knot_p0_06500.webp",
+       "sdxl_french_knot_p0_07000.webp"
+      ],
+      "1": [
+       "sdxl_french_knot_p1_00000.webp",
+       "sdxl_french_knot_p1_00500.webp",
+       "sdxl_french_knot_p1_01000.webp",
+       "sdxl_french_knot_p1_01500.webp",
+       "sdxl_french_knot_p1_02000.webp",
+       "sdxl_french_knot_p1_02500.webp",
+       "sdxl_french_knot_p1_03000.webp",
+       "sdxl_french_knot_p1_03500.webp",
+       "sdxl_french_knot_p1_04000.webp",
+       "sdxl_french_knot_p1_04500.webp",
+       "sdxl_french_knot_p1_05000.webp",
+       "sdxl_french_knot_p1_05500.webp",
+       "sdxl_french_knot_p1_06000.webp",
+       "sdxl_french_knot_p1_06500.webp",
+       "sdxl_french_knot_p1_07000.webp"
+      ]
+     },
+     "prompts": {
+      "0": "embfnchknt",
+      "1": "embfnchknt, close-up macro photograph, raking light"
+     },
+     "prompt_source": "french_knot_stitch_sdxl_lora_v1.yaml"
+    },
+    "satin": {
+     "run": "satin_stitch_sdxl_lora_v1",
+     "steps": [
+      0,
+      500,
+      1000,
+      1500,
+      2000,
+      2500,
+      3000,
+      3500,
+      4000,
+      4500,
+      5000,
+      5500,
+      6000,
+      6500,
+      7000
+     ],
+     "files": {
+      "0": [
+       "sdxl_satin_p0_00000.webp",
+       "sdxl_satin_p0_00500.webp",
+       "sdxl_satin_p0_01000.webp",
+       "sdxl_satin_p0_01500.webp",
+       "sdxl_satin_p0_02000.webp",
+       "sdxl_satin_p0_02500.webp",
+       "sdxl_satin_p0_03000.webp",
+       "sdxl_satin_p0_03500.webp",
+       "sdxl_satin_p0_04000.webp",
+       "sdxl_satin_p0_04500.webp",
+       "sdxl_satin_p0_05000.webp",
+       "sdxl_satin_p0_05500.webp",
+       "sdxl_satin_p0_06000.webp",
+       "sdxl_satin_p0_06500.webp",
+       "sdxl_satin_p0_07000.webp"
+      ],
+      "1": [
+       "sdxl_satin_p1_00000.webp",
+       "sdxl_satin_p1_00500.webp",
+       "sdxl_satin_p1_01000.webp",
+       "sdxl_satin_p1_01500.webp",
+       "sdxl_satin_p1_02000.webp",
+       "sdxl_satin_p1_02500.webp",
+       "sdxl_satin_p1_03000.webp",
+       "sdxl_satin_p1_03500.webp",
+       "sdxl_satin_p1_04000.webp",
+       "sdxl_satin_p1_04500.webp",
+       "sdxl_satin_p1_05000.webp",
+       "sdxl_satin_p1_05500.webp",
+       "sdxl_satin_p1_06000.webp",
+       "sdxl_satin_p1_06500.webp",
+       "sdxl_satin_p1_07000.webp"
+      ]
+     },
+     "prompts": {
+      "0": "embstn",
+      "1": "embstn, close-up macro photograph, raking light"
+     },
+     "prompt_source": "satin_stitch_sdxl_lora_v1.yaml"
+    },
+    "silk_purl": {
+     "run": "silk_purl_sdxl_lora_v1",
+     "steps": [
+      0,
+      500,
+      1000,
+      1500,
+      2000,
+      2500,
+      3000,
+      3500,
+      4000,
+      4500,
+      5000,
+      5500,
+      6000,
+      6500,
+      7000
+     ],
+     "files": {
+      "0": [
+       "sdxl_silk_purl_p0_00000.webp",
+       "sdxl_silk_purl_p0_00500.webp",
+       "sdxl_silk_purl_p0_01000.webp",
+       "sdxl_silk_purl_p0_01500.webp",
+       "sdxl_silk_purl_p0_02000.webp",
+       "sdxl_silk_purl_p0_02500.webp",
+       "sdxl_silk_purl_p0_03000.webp",
+       "sdxl_silk_purl_p0_03500.webp",
+       "sdxl_silk_purl_p0_04000.webp",
+       "sdxl_silk_purl_p0_04500.webp",
+       "sdxl_silk_purl_p0_05000.webp",
+       "sdxl_silk_purl_p0_05500.webp",
+       "sdxl_silk_purl_p0_06000.webp",
+       "sdxl_silk_purl_p0_06500.webp",
+       "sdxl_silk_purl_p0_07000.webp"
+      ],
+      "1": [
+       "sdxl_silk_purl_p1_00000.webp",
+       "sdxl_silk_purl_p1_00500.webp",
+       "sdxl_silk_purl_p1_01000.webp",
+       "sdxl_silk_purl_p1_01500.webp",
+       "sdxl_silk_purl_p1_02000.webp",
+       "sdxl_silk_purl_p1_02500.webp",
+       "sdxl_silk_purl_p1_03000.webp",
+       "sdxl_silk_purl_p1_03500.webp",
+       "sdxl_silk_purl_p1_04000.webp",
+       "sdxl_silk_purl_p1_04500.webp",
+       "sdxl_silk_purl_p1_05000.webp",
+       "sdxl_silk_purl_p1_05500.webp",
+       "sdxl_silk_purl_p1_06000.webp",
+       "sdxl_silk_purl_p1_06500.webp",
+       "sdxl_silk_purl_p1_07000.webp"
+      ]
+     },
+     "prompts": {
+      "0": "embslkprl",
+      "1": "embslkprl, close-up macro photograph, raking light"
+     },
+     "prompt_source": "silk_purl_sdxl_lora_v1.yaml"
+    }
+   }
+  },
+  {
+   "key": "flux1_v1",
+   "label": "FLUX.1-dev (v1)",
+   "figure3_prompt_index": 0,
+   "runs": {
+    "french_knot": {
+     "run": "french_knot_stitch_flux1_lora_v1",
+     "steps": [
+      0,
+      500,
+      1000,
+      1500,
+      2000,
+      2500,
+      3000,
+      3500,
+      4000,
+      4500,
+      5000,
+      5500,
+      6000,
+      6500,
+      7000
+     ],
+     "files": {
+      "0": [
+       "flux1_v1_french_knot_p0_00000.webp",
+       "flux1_v1_french_knot_p0_00500.webp",
+       "flux1_v1_french_knot_p0_01000.webp",
+       "flux1_v1_french_knot_p0_01500.webp",
+       "flux1_v1_french_knot_p0_02000.webp",
+       "flux1_v1_french_knot_p0_02500.webp",
+       "flux1_v1_french_knot_p0_03000.webp",
+       "flux1_v1_french_knot_p0_03500.webp",
+       "flux1_v1_french_knot_p0_04000.webp",
+       "flux1_v1_french_knot_p0_04500.webp",
+       "flux1_v1_french_knot_p0_05000.webp",
+       "flux1_v1_french_knot_p0_05500.webp",
+       "flux1_v1_french_knot_p0_06000.webp",
+       "flux1_v1_french_knot_p0_06500.webp",
+       "flux1_v1_french_knot_p0_07000.webp"
+      ],
+      "1": [
+       "flux1_v1_french_knot_p1_00000.webp",
+       "flux1_v1_french_knot_p1_00500.webp",
+       "flux1_v1_french_knot_p1_01000.webp",
+       "flux1_v1_french_knot_p1_01500.webp",
+       "flux1_v1_french_knot_p1_02000.webp",
+       "flux1_v1_french_knot_p1_02500.webp",
+       "flux1_v1_french_knot_p1_03000.webp",
+       "flux1_v1_french_knot_p1_03500.webp",
+       "flux1_v1_french_knot_p1_04000.webp",
+       "flux1_v1_french_knot_p1_04500.webp",
+       "flux1_v1_french_knot_p1_05000.webp",
+       "flux1_v1_french_knot_p1_05500.webp",
+       "flux1_v1_french_knot_p1_06000.webp",
+       "flux1_v1_french_knot_p1_06500.webp",
+       "flux1_v1_french_knot_p1_07000.webp"
+      ]
+     },
+     "prompts": {
+      "0": "embfnchknt",
+      "1": "embfnchknt, close-up macro photograph, raking light"
+     },
+     "prompt_source": "french_knot_stitch_flux1_lora_trigonly_v2.yaml"
+    },
+    "satin": {
+     "run": "satin_stitch_flux1_lora_v1",
+     "steps": [
+      0,
+      500,
+      1000,
+      1500,
+      2000,
+      2500,
+      3000,
+      3500,
+      4000,
+      4500,
+      5000,
+      5500,
+      6000,
+      6500,
+      7000
+     ],
+     "files": {
+      "0": [
+       "flux1_v1_satin_p0_00000.webp",
+       "flux1_v1_satin_p0_00500.webp",
+       "flux1_v1_satin_p0_01000.webp",
+       "flux1_v1_satin_p0_01500.webp",
+       "flux1_v1_satin_p0_02000.webp",
+       "flux1_v1_satin_p0_02500.webp",
+       "flux1_v1_satin_p0_03000.webp",
+       "flux1_v1_satin_p0_03500.webp",
+       "flux1_v1_satin_p0_04000.webp",
+       "flux1_v1_satin_p0_04500.webp",
+       "flux1_v1_satin_p0_05000.webp",
+       "flux1_v1_satin_p0_05500.webp",
+       "flux1_v1_satin_p0_06000.webp",
+       "flux1_v1_satin_p0_06500.webp",
+       "flux1_v1_satin_p0_07000.webp"
+      ],
+      "1": [
+       "flux1_v1_satin_p1_00000.webp",
+       "flux1_v1_satin_p1_00500.webp",
+       "flux1_v1_satin_p1_01000.webp",
+       "flux1_v1_satin_p1_01500.webp",
+       "flux1_v1_satin_p1_02000.webp",
+       "flux1_v1_satin_p1_02500.webp",
+       "flux1_v1_satin_p1_03000.webp",
+       "flux1_v1_satin_p1_03500.webp",
+       "flux1_v1_satin_p1_04000.webp",
+       "flux1_v1_satin_p1_04500.webp",
+       "flux1_v1_satin_p1_05000.webp",
+       "flux1_v1_satin_p1_05500.webp",
+       "flux1_v1_satin_p1_06000.webp",
+       "flux1_v1_satin_p1_06500.webp",
+       "flux1_v1_satin_p1_07000.webp"
+      ]
+     },
+     "prompts": {
+      "0": "embstn",
+      "1": "embstn, close-up macro photograph, raking light"
+     },
+     "prompt_source": "satin_stitch_flux1_lora_trigonly_v2.yaml"
+    },
+    "silk_purl": {
+     "run": "silk_purl_flux1_lora_v1",
+     "steps": [
+      0,
+      500,
+      1000,
+      1500,
+      2000,
+      2500,
+      3000,
+      3500,
+      4000,
+      4500,
+      5000,
+      5500,
+      6000,
+      6500,
+      7000
+     ],
+     "files": {
+      "0": [
+       "flux1_v1_silk_purl_p0_00000.webp",
+       "flux1_v1_silk_purl_p0_00500.webp",
+       "flux1_v1_silk_purl_p0_01000.webp",
+       "flux1_v1_silk_purl_p0_01500.webp",
+       "flux1_v1_silk_purl_p0_02000.webp",
+       "flux1_v1_silk_purl_p0_02500.webp",
+       "flux1_v1_silk_purl_p0_03000.webp",
+       "flux1_v1_silk_purl_p0_03500.webp",
+       "flux1_v1_silk_purl_p0_04000.webp",
+       "flux1_v1_silk_purl_p0_04500.webp",
+       "flux1_v1_silk_purl_p0_05000.webp",
+       "flux1_v1_silk_purl_p0_05500.webp",
+       "flux1_v1_silk_purl_p0_06000.webp",
+       "flux1_v1_silk_purl_p0_06500.webp",
+       "flux1_v1_silk_purl_p0_07000.webp"
+      ],
+      "1": [
+       "flux1_v1_silk_purl_p1_00000.webp",
+       "flux1_v1_silk_purl_p1_00500.webp",
+       "flux1_v1_silk_purl_p1_01000.webp",
+       "flux1_v1_silk_purl_p1_01500.webp",
+       "flux1_v1_silk_purl_p1_02000.webp",
+       "flux1_v1_silk_purl_p1_02500.webp",
+       "flux1_v1_silk_purl_p1_03000.webp",
+       "flux1_v1_silk_purl_p1_03500.webp",
+       "flux1_v1_silk_purl_p1_04000.webp",
+       "flux1_v1_silk_purl_p1_04500.webp",
+       "flux1_v1_silk_purl_p1_05000.webp",
+       "flux1_v1_silk_purl_p1_05500.webp",
+       "flux1_v1_silk_purl_p1_06000.webp",
+       "flux1_v1_silk_purl_p1_06500.webp",
+       "flux1_v1_silk_purl_p1_07000.webp"
+      ]
+     },
+     "prompts": {
+      "0": "embslkprl",
+      "1": "embslkprl, close-up macro photograph, raking light"
+     },
+     "prompt_source": "silk_purl_flux1_lora_trigonly_v2.yaml"
+    }
+   }
+  },
+  {
+   "key": "flux1_trigonly_v2",
+   "label": "FLUX.1-dev (released, trigonly_v2)",
+   "figure3_prompt_index": 0,
+   "runs": {
+    "french_knot": {
+     "run": "french_knot_stitch_flux1_lora_trigonly_v2",
+     "steps": [
+      0,
+      500,
+      1000,
+      1500,
+      2000,
+      2500,
+      3000,
+      3500,
+      4000,
+      4500,
+      5000
+     ],
+     "files": {
+      "0": [
+       "flux1_trigonly_v2_french_knot_p0_00000.webp",
+       "flux1_trigonly_v2_french_knot_p0_00500.webp",
+       "flux1_trigonly_v2_french_knot_p0_01000.webp",
+       "flux1_trigonly_v2_french_knot_p0_01500.webp",
+       "flux1_trigonly_v2_french_knot_p0_02000.webp",
+       "flux1_trigonly_v2_french_knot_p0_02500.webp",
+       "flux1_trigonly_v2_french_knot_p0_03000.webp",
+       "flux1_trigonly_v2_french_knot_p0_03500.webp",
+       "flux1_trigonly_v2_french_knot_p0_04000.webp",
+       "flux1_trigonly_v2_french_knot_p0_04500.webp",
+       "flux1_trigonly_v2_french_knot_p0_05000.webp"
+      ],
+      "1": [
+       "flux1_trigonly_v2_french_knot_p1_00000.webp",
+       "flux1_trigonly_v2_french_knot_p1_00500.webp",
+       "flux1_trigonly_v2_french_knot_p1_01000.webp",
+       "flux1_trigonly_v2_french_knot_p1_01500.webp",
+       "flux1_trigonly_v2_french_knot_p1_02000.webp",
+       "flux1_trigonly_v2_french_knot_p1_02500.webp",
+       "flux1_trigonly_v2_french_knot_p1_03000.webp",
+       "flux1_trigonly_v2_french_knot_p1_03500.webp",
+       "flux1_trigonly_v2_french_knot_p1_04000.webp",
+       "flux1_trigonly_v2_french_knot_p1_04500.webp",
+       "flux1_trigonly_v2_french_knot_p1_05000.webp"
+      ]
+     },
+     "prompts": {
+      "0": "embfnchknt",
+      "1": "embfnchknt, close-up macro photograph, raking light"
+     },
+     "prompt_source": "french_knot_stitch_flux1_lora_trigonly_v2.yaml"
+    },
+    "satin": {
+     "run": "satin_stitch_flux1_lora_trigonly_v2",
+     "steps": [
+      0,
+      500,
+      1000,
+      1500,
+      2000,
+      2500,
+      3000,
+      3500,
+      4000,
+      4500,
+      5000
+     ],
+     "files": {
+      "0": [
+       "flux1_trigonly_v2_satin_p0_00000.webp",
+       "flux1_trigonly_v2_satin_p0_00500.webp",
+       "flux1_trigonly_v2_satin_p0_01000.webp",
+       "flux1_trigonly_v2_satin_p0_01500.webp",
+       "flux1_trigonly_v2_satin_p0_02000.webp",
+       "flux1_trigonly_v2_satin_p0_02500.webp",
+       "flux1_trigonly_v2_satin_p0_03000.webp",
+       "flux1_trigonly_v2_satin_p0_03500.webp",
+       "flux1_trigonly_v2_satin_p0_04000.webp",
+       "flux1_trigonly_v2_satin_p0_04500.webp",
+       "flux1_trigonly_v2_satin_p0_05000.webp"
+      ],
+      "1": [
+       "flux1_trigonly_v2_satin_p1_00000.webp",
+       "flux1_trigonly_v2_satin_p1_00500.webp",
+       "flux1_trigonly_v2_satin_p1_01000.webp",
+       "flux1_trigonly_v2_satin_p1_01500.webp",
+       "flux1_trigonly_v2_satin_p1_02000.webp",
+       "flux1_trigonly_v2_satin_p1_02500.webp",
+       "flux1_trigonly_v2_satin_p1_03000.webp",
+       "flux1_trigonly_v2_satin_p1_03500.webp",
+       "flux1_trigonly_v2_satin_p1_04000.webp",
+       "flux1_trigonly_v2_satin_p1_04500.webp",
+       "flux1_trigonly_v2_satin_p1_05000.webp"
+      ]
+     },
+     "prompts": {
+      "0": "embstn",
+      "1": "embstn, close-up macro photograph, raking light"
+     },
+     "prompt_source": "satin_stitch_flux1_lora_trigonly_v2.yaml"
+    },
+    "silk_purl": {
+     "run": "silk_purl_flux1_lora_trigonly_v2",
+     "steps": [
+      0,
+      500,
+      1000,
+      1500,
+      2000,
+      2500,
+      3000,
+      3500,
+      4000,
+      4500,
+      5000
+     ],
+     "files": {
+      "0": [
+       "flux1_trigonly_v2_silk_purl_p0_00000.webp",
+       "flux1_trigonly_v2_silk_purl_p0_00500.webp",
+       "flux1_trigonly_v2_silk_purl_p0_01000.webp",
+       "flux1_trigonly_v2_silk_purl_p0_01500.webp",
+       "flux1_trigonly_v2_silk_purl_p0_02000.webp",
+       "flux1_trigonly_v2_silk_purl_p0_02500.webp",
+       "flux1_trigonly_v2_silk_purl_p0_03000.webp",
+       "flux1_trigonly_v2_silk_purl_p0_03500.webp",
+       "flux1_trigonly_v2_silk_purl_p0_04000.webp",
+       "flux1_trigonly_v2_silk_purl_p0_04500.webp",
+       "flux1_trigonly_v2_silk_purl_p0_05000.webp"
+      ],
+      "1": [
+       "flux1_trigonly_v2_silk_purl_p1_00000.webp",
+       "flux1_trigonly_v2_silk_purl_p1_00500.webp",
+       "flux1_trigonly_v2_silk_purl_p1_01000.webp",
+       "flux1_trigonly_v2_silk_purl_p1_01500.webp",
+       "flux1_trigonly_v2_silk_purl_p1_02000.webp",
+       "flux1_trigonly_v2_silk_purl_p1_02500.webp",
+       "flux1_trigonly_v2_silk_purl_p1_03000.webp",
+       "flux1_trigonly_v2_silk_purl_p1_03500.webp",
+       "flux1_trigonly_v2_silk_purl_p1_04000.webp",
+       "flux1_trigonly_v2_silk_purl_p1_04500.webp",
+       "flux1_trigonly_v2_silk_purl_p1_05000.webp"
+      ]
+     },
+     "prompts": {
+      "0": "embslkprl",
+      "1": "embslkprl, close-up macro photograph, raking light"
+     },
+     "prompt_source": "silk_purl_flux1_lora_trigonly_v2.yaml"
+    }
+   }
+  },
+  {
+   "key": "qwen",
+   "label": "Qwen-Image",
+   "figure3_prompt_index": 0,
+   "runs": {
+    "french_knot": {
+     "run": "french_knot_stitch_qwen_lora_v1",
+     "steps": [
+      0,
+      500,
+      1000,
+      1500,
+      2000,
+      2500,
+      3000,
+      3500,
+      4000,
+      4500,
+      5000,
+      5500,
+      6000,
+      6500,
+      7000
+     ],
+     "files": {
+      "0": [
+       "qwen_french_knot_p0_00000.webp",
+       "qwen_french_knot_p0_00500.webp",
+       "qwen_french_knot_p0_01000.webp",
+       "qwen_french_knot_p0_01500.webp",
+       "qwen_french_knot_p0_02000.webp",
+       "qwen_french_knot_p0_02500.webp",
+       "qwen_french_knot_p0_03000.webp",
+       "qwen_french_knot_p0_03500.webp",
+       "qwen_french_knot_p0_04000.webp",
+       "qwen_french_knot_p0_04500.webp",
+       "qwen_french_knot_p0_05000.webp",
+       "qwen_french_knot_p0_05500.webp",
+       "qwen_french_knot_p0_06000.webp",
+       "qwen_french_knot_p0_06500.webp",
+       "qwen_french_knot_p0_07000.webp"
+      ],
+      "1": [
+       "qwen_french_knot_p1_00000.webp",
+       "qwen_french_knot_p1_00500.webp",
+       "qwen_french_knot_p1_01000.webp",
+       "qwen_french_knot_p1_01500.webp",
+       "qwen_french_knot_p1_02000.webp",
+       "qwen_french_knot_p1_02500.webp",
+       "qwen_french_knot_p1_03000.webp",
+       "qwen_french_knot_p1_03500.webp",
+       "qwen_french_knot_p1_04000.webp",
+       "qwen_french_knot_p1_04500.webp",
+       "qwen_french_knot_p1_05000.webp",
+       "qwen_french_knot_p1_05500.webp",
+       "qwen_french_knot_p1_06000.webp",
+       "qwen_french_knot_p1_06500.webp",
+       "qwen_french_knot_p1_07000.webp"
+      ]
+     },
+     "prompts": {
+      "0": "embfnchknt",
+      "1": "embfnchknt, close-up macro photograph, raking light"
+     },
+     "prompt_source": "french_knot_stitch_qwen_lora_v1.yaml"
+    },
+    "satin": {
+     "run": "satin_stitch_qwen_lora_v1",
+     "steps": [
+      0,
+      500,
+      1000,
+      1500,
+      2000,
+      2500,
+      3000,
+      3500,
+      4000,
+      7000
+     ],
+     "files": {
+      "0": [
+       "qwen_satin_p0_00000.webp",
+       "qwen_satin_p0_00500.webp",
+       "qwen_satin_p0_01000.webp",
+       "qwen_satin_p0_01500.webp",
+       "qwen_satin_p0_02000.webp",
+       "qwen_satin_p0_02500.webp",
+       "qwen_satin_p0_03000.webp",
+       "qwen_satin_p0_03500.webp",
+       "qwen_satin_p0_04000.webp",
+       "qwen_satin_p0_07000.webp"
+      ],
+      "1": [
+       "qwen_satin_p1_00000.webp",
+       "qwen_satin_p1_00500.webp",
+       "qwen_satin_p1_01000.webp",
+       "qwen_satin_p1_01500.webp",
+       "qwen_satin_p1_02000.webp",
+       "qwen_satin_p1_02500.webp",
+       "qwen_satin_p1_03000.webp",
+       "qwen_satin_p1_03500.webp",
+       "qwen_satin_p1_04000.webp",
+       "qwen_satin_p1_07000.webp"
+      ]
+     },
+     "prompts": {
+      "0": "embstn",
+      "1": "embstn, close-up macro photograph, raking light"
+     },
+     "prompt_source": "satin_stitch_qwen_lora_v1.yaml"
+    },
+    "silk_purl": {
+     "run": "silk_purl_qwen_lora_v1",
+     "steps": [
+      0,
+      7000
+     ],
+     "files": {
+      "0": [
+       "qwen_silk_purl_p0_00000.webp",
+       "qwen_silk_purl_p0_07000.webp"
+      ],
+      "1": [
+       "qwen_silk_purl_p1_00000.webp",
+       "qwen_silk_purl_p1_07000.webp"
+      ]
+     },
+     "prompts": {
+      "0": "embslkprl",
+      "1": "embslkprl, close-up macro photograph, raking light"
+     },
+     "prompt_source": "silk_purl_qwen_lora_v1.yaml"
+    }
+   }
+  },
+  {
+   "key": "zimage",
+   "label": "Z-Image",
+   "figure3_prompt_index": 0,
+   "runs": {
+    "french_knot": {
+     "run": "french_knot_stitch_zimage_lora_v1",
+     "steps": [
+      0,
+      500,
+      1000,
+      1500,
+      2000,
+      2500,
+      3000,
+      3500,
+      4000,
+      4500,
+      5000,
+      5500,
+      6000,
+      6500,
+      7000
+     ],
+     "files": {
+      "0": [
+       "zimage_french_knot_p0_00000.webp",
+       "zimage_french_knot_p0_00500.webp",
+       "zimage_french_knot_p0_01000.webp",
+       "zimage_french_knot_p0_01500.webp",
+       "zimage_french_knot_p0_02000.webp",
+       "zimage_french_knot_p0_02500.webp",
+       "zimage_french_knot_p0_03000.webp",
+       "zimage_french_knot_p0_03500.webp",
+       "zimage_french_knot_p0_04000.webp",
+       "zimage_french_knot_p0_04500.webp",
+       "zimage_french_knot_p0_05000.webp",
+       "zimage_french_knot_p0_05500.webp",
+       "zimage_french_knot_p0_06000.webp",
+       "zimage_french_knot_p0_06500.webp",
+       "zimage_french_knot_p0_07000.webp"
+      ],
+      "1": [
+       "zimage_french_knot_p1_00000.webp",
+       "zimage_french_knot_p1_00500.webp",
+       "zimage_french_knot_p1_01000.webp",
+       "zimage_french_knot_p1_01500.webp",
+       "zimage_french_knot_p1_02000.webp",
+       "zimage_french_knot_p1_02500.webp",
+       "zimage_french_knot_p1_03000.webp",
+       "zimage_french_knot_p1_03500.webp",
+       "zimage_french_knot_p1_04000.webp",
+       "zimage_french_knot_p1_04500.webp",
+       "zimage_french_knot_p1_05000.webp",
+       "zimage_french_knot_p1_05500.webp",
+       "zimage_french_knot_p1_06000.webp",
+       "zimage_french_knot_p1_06500.webp",
+       "zimage_french_knot_p1_07000.webp"
+      ]
+     },
+     "prompts": {
+      "0": "embfnchknt",
+      "1": "embfnchknt, close-up macro photograph, raking light"
+     },
+     "prompt_source": "french_knot_stitch_zimage_lora_v1.yaml"
+    },
+    "satin": {
+     "run": "satin_stitch_zimage_lora_v1",
+     "steps": [
+      0,
+      500,
+      1000,
+      1500,
+      2000,
+      2500,
+      3000,
+      3500,
+      4000,
+      4500,
+      5000,
+      5500,
+      6000,
+      6500,
+      7000
+     ],
+     "files": {
+      "0": [
+       "zimage_satin_p0_00000.webp",
+       "zimage_satin_p0_00500.webp",
+       "zimage_satin_p0_01000.webp",
+       "zimage_satin_p0_01500.webp",
+       "zimage_satin_p0_02000.webp",
+       "zimage_satin_p0_02500.webp",
+       "zimage_satin_p0_03000.webp",
+       "zimage_satin_p0_03500.webp",
+       "zimage_satin_p0_04000.webp",
+       "zimage_satin_p0_04500.webp",
+       "zimage_satin_p0_05000.webp",
+       "zimage_satin_p0_05500.webp",
+       "zimage_satin_p0_06000.webp",
+       "zimage_satin_p0_06500.webp",
+       "zimage_satin_p0_07000.webp"
+      ],
+      "1": [
+       "zimage_satin_p1_00000.webp",
+       "zimage_satin_p1_00500.webp",
+       "zimage_satin_p1_01000.webp",
+       "zimage_satin_p1_01500.webp",
+       "zimage_satin_p1_02000.webp",
+       "zimage_satin_p1_02500.webp",
+       "zimage_satin_p1_03000.webp",
+       "zimage_satin_p1_03500.webp",
+       "zimage_satin_p1_04000.webp",
+       "zimage_satin_p1_04500.webp",
+       "zimage_satin_p1_05000.webp",
+       "zimage_satin_p1_05500.webp",
+       "zimage_satin_p1_06000.webp",
+       "zimage_satin_p1_06500.webp",
+       "zimage_satin_p1_07000.webp"
+      ]
+     },
+     "prompts": {
+      "0": "embstn",
+      "1": "embstn, close-up macro photograph, raking light"
+     },
+     "prompt_source": "satin_stitch_zimage_lora_v1.yaml"
+    },
+    "silk_purl": {
+     "run": "silk_purl_zimage_lora_v1",
+     "steps": [
+      0,
+      500,
+      1000,
+      1500,
+      2000,
+      2500,
+      3000,
+      3500,
+      4000,
+      4500,
+      5000,
+      5500,
+      6000,
+      6500,
+      7000
+     ],
+     "files": {
+      "0": [
+       "zimage_silk_purl_p0_00000.webp",
+       "zimage_silk_purl_p0_00500.webp",
+       "zimage_silk_purl_p0_01000.webp",
+       "zimage_silk_purl_p0_01500.webp",
+       "zimage_silk_purl_p0_02000.webp",
+       "zimage_silk_purl_p0_02500.webp",
+       "zimage_silk_purl_p0_03000.webp",
+       "zimage_silk_purl_p0_03500.webp",
+       "zimage_silk_purl_p0_04000.webp",
+       "zimage_silk_purl_p0_04500.webp",
+       "zimage_silk_purl_p0_05000.webp",
+       "zimage_silk_purl_p0_05500.webp",
+       "zimage_silk_purl_p0_06000.webp",
+       "zimage_silk_purl_p0_06500.webp",
+       "zimage_silk_purl_p0_07000.webp"
+      ],
+      "1": [
+       "zimage_silk_purl_p1_00000.webp",
+       "zimage_silk_purl_p1_00500.webp",
+       "zimage_silk_purl_p1_01000.webp",
+       "zimage_silk_purl_p1_01500.webp",
+       "zimage_silk_purl_p1_02000.webp",
+       "zimage_silk_purl_p1_02500.webp",
+       "zimage_silk_purl_p1_03000.webp",
+       "zimage_silk_purl_p1_03500.webp",
+       "zimage_silk_purl_p1_04000.webp",
+       "zimage_silk_purl_p1_04500.webp",
+       "zimage_silk_purl_p1_05000.webp",
+       "zimage_silk_purl_p1_05500.webp",
+       "zimage_silk_purl_p1_06000.webp",
+       "zimage_silk_purl_p1_06500.webp",
+       "zimage_silk_purl_p1_07000.webp"
+      ]
+     },
+     "prompts": {
+      "0": "embslkprl",
+      "1": "embslkprl, close-up macro photograph, raking light"
+     },
+     "prompt_source": "silk_purl_zimage_lora_v1.yaml"
+    }
+   }
+  }
+ ],
+ "stitches": [
+  "french_knot",
+  "satin",
+  "silk_purl"
+ ],
+ "gt": {
+  "french_knot": "gt_french_knot.webp",
+  "satin": "gt_satin.webp",
+  "silk_purl": "gt_silk_purl.webp"
+ },
+ "prompts": {
+  "french_knot": {
+   "0": "embfnchknt",
+   "1": "embfnchknt, close-up macro photograph, raking light"
+  },
+  "satin": {
+   "0": "embstn",
+   "1": "embstn, close-up macro photograph, raking light"
+  },
+  "silk_purl": {
+   "0": "embslkprl",
+   "1": "embslkprl, close-up macro photograph, raking light"
+  }
+ },
+ "figure3_prompt_index": {
+  "sdxl": 1,
+  "flux1_v1": 0,
+  "flux1_trigonly_v2": 0,
+  "qwen": 0,
+  "zimage": 0
+ },
+ "frame_size": 320,
+ "step_interval": 500,
+ "note": "Frames are ai-toolkit training samples every 500 steps, fixed seed per prompt index; step 0 is the untrained base model. Steps that were never sampled are omitted, not interpolated: Qwen-Image satin has no samples for 4500-6500 (training resumed without sampling, only the final 7000 step was sampled), Qwen-Image silk purl has only steps 0 and 7000, and the released FLUX.1-dev trigonly_v2 runs stop at 5000. FLUX.1-dev v1 prompts are taken from the trigonly_v2 configs (the v1 configs were not kept; the step-0 samples of both runs are pixel-identical). Satin FLUX.1-dev v1 has two 7000-step sample sets; the first is used."
+}

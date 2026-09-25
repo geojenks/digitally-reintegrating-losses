@@ -1,0 +1,85 @@
+{
+ "width": 900,
+ "steps": [
+  {
+   "step": 1,
+   "file": "step1.webp",
+   "caption": "Photograph: the design survives, but the stitches are lost",
+   "size": [
+    900,
+    900
+   ]
+  },
+  {
+   "step": 2,
+   "file": "step2.webp",
+   "caption": "Mask each region by stitch type",
+   "size": [
+    900,
+    900
+   ]
+  },
+  {
+   "step": 3,
+   "file": "step3.webp",
+   "caption": "Fill each region with a procedural stand-in of its stitch",
+   "size": [
+    900,
+    900
+   ]
+  },
+  {
+   "step": 4,
+   "file": "step4.webp",
+   "caption": "Add noise and denoise with the stitch LoRA",
+   "size": [
+    900,
+    900
+   ]
+  }
+ ],
+ "masks": [
+  {
+   "stitch": "french_knot",
+   "label": "French knot",
+   "file": "mask_french_knot.webp",
+   "colour": "#1e76b4",
+   "alpha": 0.55,
+   "area_fraction": 0.1271
+  },
+  {
+   "stitch": "satin",
+   "label": "Satin stitch",
+   "file": "mask_satin.webp",
+   "colour": "#2ba02b",
+   "alpha": 0.55,
+   "area_fraction": 0.2407
+  },
+  {
+   "stitch": "silk_purl",
+   "label": "Silk purl",
+   "file": "mask_silk_purl.webp",
+   "colour": "#d52523",
+   "alpha": 0.55,
+   "area_fraction": 0.0306
+  }
+ ],
+ "inits": [
+  {
+   "file": "init_stage1.webp",
+   "after_stitch": "french_knot",
+   "caption": "Procedural fill: French knot regions"
+  },
+  {
+   "file": "init_stage2.webp",
+   "after_stitch": "satin",
+   "caption": "Procedural fill: French knot and satin regions"
+  },
+  {
+   "file": "step3.webp",
+   "after_stitch": "silk_purl",
+   "caption": "Procedural fill: all regions"
+  }
+ ],
+ "note": "Masks are disjoint; overlays are transparent outside their region and can be stacked over step1.webp in any order. init_stage1/2 and step3 are the cumulative procedural paste, one stitch at a time."
+}

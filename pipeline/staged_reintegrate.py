@@ -634,6 +634,13 @@ def main():
                          "around it, upscale to the working size, fill, downscale and paste back. "
                          "Stops structures 'continuing' between disconnected regions and raises "
                          "the effective resolution of small regions")
+    ap.add_argument("--per_layer", action="store_true",
+                    help="with --per_region: split each stage by layer before finding connected "
+                         "regions, so touching layers of one stitch are filled separately")
+    ap.add_argument("--proc_base", action="store_true",
+                    help="with --paste_tex: paste every stage's init before the first pass, so "
+                         "no stage sees the original photo inside any mask (only unmasked pixels "
+                         "keep it)")
     ap.add_argument("--paste_only", action="store_true",
                     help="write the pure pasted-init composites (implies --paste_tex) and exit "
                          "without loading any model — for approving the paste before denoising")
@@ -970,7 +977,7 @@ def main():
     if args.paste_tex:
         variant_tag += "_procpaste" if args.tex_proc else "_paste"
     if args.per_region:
-        variant_tag += "_perreg"
+        variant_tag += "_perlay" if args.per_layer else "_perreg"
     if args.brim > 0:
         variant_tag += f"_brim{args.brim}"
     if args.sib_feather > 0:
@@ -992,6 +999,8 @@ def main():
     if args.proc_satin_angle or args.proc_satin_angle_step:
         variant_tag += f"_sa{args.proc_satin_angle:g}s{args.proc_satin_angle_step:g}"
 
+    if args.proc_base and args.paste_tex:
+        variant_tag += "_pbase"
     out_root = Path(args.out) / stem
     save_job(out_root)
     for run_i, (seeds, tag) in enumerate(runs, 1):
@@ -1003,6 +1012,12 @@ def main():
         tex_used = {}
         variants_meta = []
         running = base.copy()
+        if args.proc_base and args.paste_tex:
+            # --proc_base: every mask gets its init up front; each stage re-pastes its own
+            _brng = rng or random.Random(seeds[0])
+            for st in order:
+                running, _ = paste_stage(running, st, lm, _brng, rng)
+            cut(running).save(tdir / "proc_base.png")
         for i, st in enumerate(order, 1):
             seed = seeds[i - 1]                                  # per-stage seed
             _, trig = STITCH[st]
@@ -1026,11 +1041,16 @@ def main():
                 # each connected region independently: crop a padded square, upscale to
                 # the working size, fill, downscale, paste back through the region mask
                 import cv2
-                m8 = (np.asarray(mL[st]) >= 128).astype(np.uint8)
-                n_comp, labels = cv2.connectedComponents(m8)
+                # --per_layer: split by layer first, so adjacent layers of one stitch
+                # (e.g. the tones of a face) are filled separately, each in its own crop
+                srcs = [lma[li] for li in stage_layers[st]] if args.per_layer \
+                    else [np.asarray(mL[st]) >= 128]
+                comps = []
+                for sm in srcs:
+                    n_comp, labels = cv2.connectedComponents(sm.astype(np.uint8))
+                    comps += [labels == c for c in range(1, n_comp)]
                 done = 0
-                for lab in range(1, n_comp):
-                    comp = labels == lab
+                for lab, comp in enumerate(comps, 1):
                     if comp.sum() < 25:                  # specks: the paste-init already fills them
                         continue
                     ys, xs = np.nonzero(comp)

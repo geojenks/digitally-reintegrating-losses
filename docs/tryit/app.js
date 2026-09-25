@@ -18,7 +18,7 @@
   var UNDO_LIMIT = 15;
   var COLAB_URL = 'https://colab.research.google.com/github/geojenks/digitally-reintegrating-losses/blob/main/notebooks/generate_textures_colab.ipynb';
   // Recipe defaults from the JOB_FORMAT.md example; seed and region_variants come from the page.
-  var RECIPE = { per_region: true, brim: 10, sib_feather: 3, region_max_up: 2, denoise: 0.6,
+  var RECIPE = { per_region: true, proc_base: true, brim: 10, sib_feather: 3, region_max_up: 2, denoise: 0.6,
                  denoise_french_knot: 0.65, denoise_satin: 0.5, denoise_silk_purl: 0.8, size: 1024 };
   var LAYER_KEYS = ['id', 'stitch', 'mask', 'colour', 'angle', 'thread', 'knot_r', 'coil'];
   var STITCH_KEYS = ['lora', 'trigger', 'init'];

@@ -1,0 +1,130 @@
+{
+ "size": 640,
+ "stops": [
+  {
+   "id": "knot",
+   "stitch": "French knot",
+   "variable": "knot radius",
+   "unit": "px",
+   "denoise": "0.65",
+   "values": [
+    {
+     "label": "8",
+     "init": "knot_r8_init.webp",
+     "final": "knot_r8_final.webp"
+    },
+    {
+     "label": "12",
+     "init": "knot_r12_init.webp",
+     "final": "knot_r12_final.webp"
+    },
+    {
+     "label": "16",
+     "init": "knot_r16_init.webp",
+     "final": "knot_r16_final.webp"
+    },
+    {
+     "label": "24",
+     "init": "knot_r24_init.webp",
+     "final": "knot_r24_final.webp"
+    }
+   ]
+  },
+  {
+   "id": "thread",
+   "stitch": "Satin",
+   "variable": "thread width",
+   "unit": "px",
+   "denoise": "0.5",
+   "values": [
+    {
+     "label": "2",
+     "init": "thread_t2_init.webp",
+     "final": "thread_t2_final.webp"
+    },
+    {
+     "label": "4.5",
+     "init": "thread_t4_5_init.webp",
+     "final": "thread_t4_5_final.webp"
+    },
+    {
+     "label": "9",
+     "init": "thread_t9_init.webp",
+     "final": "thread_t9_final.webp"
+    },
+    {
+     "label": "14",
+     "init": "thread_t14_init.webp",
+     "final": "thread_t14_final.webp"
+    }
+   ]
+  },
+  {
+   "id": "angle",
+   "stitch": "Satin",
+   "variable": "thread angle",
+   "unit": "°",
+   "denoise": "0.5",
+   "values": [
+    {
+     "label": "0",
+     "init": "angle_step30_init.webp",
+     "final": "angle_step30_final.webp"
+    },
+    {
+     "label": "45",
+     "init": "angle_uniform45_init.webp",
+     "final": "angle_uniform45_final.webp"
+    }
+   ]
+  },
+  {
+   "id": "coil",
+   "stitch": "Silk purl",
+   "variable": "coil pitch",
+   "unit": "px",
+   "denoise": "0.8",
+   "values": [
+    {
+     "label": "4",
+     "init": "coil_c4_init.webp",
+     "final": "coil_c4_final.webp"
+    },
+    {
+     "label": "7",
+     "init": "coil_c7_init.webp",
+     "final": "coil_c7_final.webp"
+    },
+    {
+     "label": "12",
+     "init": "coil_c12_init.webp",
+     "final": "coil_c12_final.webp"
+    },
+    {
+     "label": "18",
+     "init": "coil_c18_init.webp",
+     "final": "coil_c18_final.webp"
+    }
+   ]
+  },
+  {
+   "id": "colour",
+   "stitch": "All three stitches",
+   "variable": "colour",
+   "unit": "",
+   "denoise": "0.65 / 0.5 / 0.8 (French knot / satin / silk purl)",
+   "values": [
+    {
+     "label": "blue knots, gold satin, silver purl",
+     "init": "colour_A_init.webp",
+     "final": "colour_A_final.webp"
+    },
+    {
+     "label": "green knots, red satin, gold purl",
+     "init": "colour_B_init.webp",
+     "final": "colour_B_final.webp"
+    }
+   ]
+  }
+ ]
+}
