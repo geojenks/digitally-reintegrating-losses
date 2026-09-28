@@ -46,7 +46,7 @@ a LoRA and generate fills may be paid for on Huggingface.
 | `training/configs/` | The exact [ai-toolkit](https://github.com/ostris/ai-toolkit) configs the released LoRAs were trained with |
 | `training/TRAINING_TO_INFERENCE.txt` | Which base each LoRA was trained on, and which model to load it onto at inference |
 | `data/stitches/` | 20 sample training images + captions per stitch (satin, french knot, silk purl), plus the trigger-only caption variants |
-| `data/tiles_sample/` | Matched colour/normal RTI tile pairs (768×768) from the Marigold fine-tuning set. 12 pairs here, a 100-pair zip on the release, full 13,551-pair set on Zenodo |
+| `data/tiles_sample/` | Matched colour/normal RTI tile pairs (768×768) from the Marigold fine-tuning set. 12 pairs here, a 100-pair zip on the release, full 13,551-pair set on Zenodo, available on request |
 | `data/masks/` | The castle demonstration piece and its per-stitch loss masks |
 | `models/` | Where LoRA weights go, see [models/README.md](models/README.md) for downloads |
 | `demo/` | The per-region variant picker (static HTML) |
@@ -168,10 +168,30 @@ inference target.
 ## Data licence and provenance
 
 The photographs derive from RTI captures of 17th-century English
-embroideries from a collection held by our collaborators at the
-Holburne Museum, Bath, in the United Kingdom. Samples in `data/`
-and the Zenodo deposit are released for educational and academic
-use. Code is MIT-licensed (see `LICENSE`).
+embroideries in the collection of The Holburne Museum, Bath, UK,
+recorded by the Centre for Print Research, University of the West of
+England, Bristol, under an agreement with the Museum. We thank the
+Holburne for access to the embroideries and for permission to
+reproduce them.
+
+The full photometric stereo tile set and the fine-tuned Marigold
+checkpoint are on Zenodo
+([part 1](https://doi.org/10.5281/zenodo.22828363),
+[part 2](https://doi.org/10.5281/zenodo.22920709)) and are
+**available on request** for non-commercial academic research,
+teaching and private study, under the dataset licence shown on each
+record. The samples in `data/` are for educational and academic,
+non-commercial use only. Please carry this credit with any of the
+images:
+
+> Images of objects in the collection of The Holburne Museum.
+> Dataset recorded by the Centre for Print Research, University of
+> the West of England, Bristol. Reproduced by permission. Not for
+> commercial use.
+
+Reintegrated and generated images in this repository are outputs of
+the method, not photographs of the objects as they are. Code is
+MIT-licensed (see `LICENSE`).
 
 ## Citation
 

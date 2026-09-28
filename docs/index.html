@@ -27,7 +27,7 @@
     <a href="#">📄 Paper (coming soon)</a>
     <a href="https://github.com/geojenks/digitally-reintegrating-losses">💻 Code &amp; data</a>
     <a href="https://colab.research.google.com/github/geojenks/digitally-reintegrating-losses/blob/main/notebooks/generate_textures_colab.ipynb">▶ Colab</a>
-    <a href="https://doi.org/10.5281/zenodo.22828363">🗄 Dataset &amp; models (Zenodo)</a>
+    <a href="https://doi.org/10.5281/zenodo.22828363">🗄 Dataset &amp; models (Zenodo, on request)</a>
   </nav>
 </header>
 
@@ -50,7 +50,7 @@ many cases ethically precluded, yet a credible image of the intact object is val
 planning, interpretation and public engagement. We present a workflow for digital reintegration of losses
 that is deliberately independent of any single generative model. Low-rank adapters (LoRAs) encode individual
 stitch structures (<b>satin stitch</b>, <b>french knot</b> and <b>silk purl</b>) from photographic crops of
-17th-century English embroideries, and are deployed on the inpainting or instruction-edit variants of four
+17th-century English embroideries in the collection of The Holburne Museum, Bath, and are deployed on the inpainting or instruction-edit variants of four
 contemporary image-generation model families.
 </p>
 <p>
@@ -171,10 +171,24 @@ parameters; up and down step through values.</p>
   <li><b>Training samples</b>: 20 image and caption pairs per stitch, with the exact
       <a href="https://github.com/ostris/ai-toolkit">ai-toolkit</a> configs, in the repo.</li>
   <li><b>Photometric stereo tiles and fine-tuned Marigold</b>: 13,551 colour and normal pairs and the
-      3.5&nbsp;GB normals checkpoint, on Zenodo. The checkpoint and colour tiles are in
-      <a href="https://doi.org/10.5281/zenodo.22828363">part 1</a> and the normal tiles in
-      <a href="https://doi.org/10.5281/zenodo.22920709">part 2</a>. A 100-pair sample is in the repo.</li>
+      3.5&nbsp;GB normals checkpoint, on Zenodo. These are <b>available on request</b> for non-commercial
+      academic research, teaching and private study, under the dataset licence shown on each record. The
+      checkpoint and colour tiles are in <a href="https://doi.org/10.5281/zenodo.22828363">part 1</a> and the
+      normal tiles in <a href="https://doi.org/10.5281/zenodo.22920709">part 2</a>; request access on each record
+      page. A 100-pair sample is in the repo.</li>
 </ul>
+
+<h2>Acknowledgements</h2>
+<p>
+We thank <b>The Holburne Museum, Bath</b>, for access to the embroideries in its collection on which this
+work is built, and for permission to reproduce them. The embroideries were recorded by the Centre for Print
+Research, University of the West of England, Bristol, under an agreement with the Museum. This research was
+funded by the Arts and Humanities Research Council (AHRC) under grant reference AH/X006522/1.
+</p>
+<p class="credit">
+Images of objects in the collection of The Holburne Museum. Dataset recorded by the Centre for Print Research, University of the West of England, Bristol. Reproduced by permission. Not for commercial use. Reintegrated fills and generated textures on this page are produced by our method; they
+do not show the objects as they are.
+</p>
 
 <h2>Citation</h2>
 <pre>@inproceedings{reintegrating-losses-2026,

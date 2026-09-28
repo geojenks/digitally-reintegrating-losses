@@ -1,6 +1,10 @@
 # Sample data
 
-For educational and academic use only.
+For educational and academic, non-commercial use only.
+
+Images of objects in the collection of The Holburne Museum. Dataset
+recorded by the Centre for Print Research, University of the West of
+England, Bristol. Reproduced by permission. Not for commercial use.
 
 ## `stitches/`
 
@@ -21,8 +25,8 @@ embroidery. Same filename = same tile. 12 pairs live here for
 browsing; a 100-pair sample (`tiles_sample_100_pairs.zip`) is attached
 to the
 [latest release](https://github.com/geojenks/digitally-reintegrating-losses/releases).
-The full set and the fine-tuned checkpoint are on Zenodo, split over
-two records: checkpoint + colour tiles in
+The full set and the fine-tuned checkpoint are on Zenodo, available
+on request under the dataset licence, split over two records: checkpoint + colour tiles in
 https://doi.org/10.5281/zenodo.22828363, normal tiles in
 https://doi.org/10.5281/zenodo.22920709
 

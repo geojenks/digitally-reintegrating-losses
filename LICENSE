@@ -14,7 +14,7 @@ copies or substantial portions of the Software.
 
 The image data under data/ (training samples, RTI tiles, masks and result
 images) is NOT covered by this licence; it is provided for educational and
-academic use only — see README.md.
+academic, non-commercial use only; see README.md.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
