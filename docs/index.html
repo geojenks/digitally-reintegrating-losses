@@ -77,7 +77,8 @@ stitching. Each caption contains a rare trigger token (<code>embfnchknt</code>, 
 <code>embslkprl</code>), so the stitch can be invoked or withheld at inference. The same crops and recipe were
 applied to four base models (SDXL, FLUX.1-dev, Qwen-Image and Z-Image), and each LoRA transfers without retraining
 onto its model's inpainting or edit variant. Training a stitch LoRA takes hours, so when a base model is superseded
-the same crops and recipe re-create the stitch vocabulary on its successor. The workflow is a method, not a model.
+the same crops and recipe re-create the stitch vocabulary on its successor. All of the models carry bias - 
+sometimes they continue to produce what they were trained on even after a lot of fine-tuning.
 </p>
 <div class="widget" id="lora"><p class="widget-loading">Loading training samples…</p></div>
 <p class="cap">The same stitch vocabulary learned on four models from one dataset and recipe (paper Figure 3).
